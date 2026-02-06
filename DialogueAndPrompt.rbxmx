@@ -10108,6 +10108,863 @@ return DialogModule]]></ProtectedString>
 				</Item>
 			</Item>
 		</Item>
+			<Item class="Folder" referent="RBX71C1879E487949349F25F380B6730DEE">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">QuestSystem</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			<Item class="Folder" referent="RBXAA88737AA76D42C1B1F532C0834DE94E">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Config</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			<Item class="ModuleScript" referent="RBX26A603E254344FA19BBDA7F9BACF257D">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[return {
+	DayStartMinutes = 360,
+	DayEndMinutes = 1080,
+}]]></ProtectedString>
+					<string name="ScriptGuid">{01308de7-aea9-4f9b-a4de-b3c0b8524459}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">TimeConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX9EB375B15ED14A6FBA68B610B4B841C6">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[local RarityConfig = {
+	RarityOrder = {"Common", "Epic", "Legendary"},
+	Rarities = {
+		Common = {
+			DisplayName = "Common",
+			DefaultThreat = 20,
+			Theme = {
+				Accent = Color3.fromRGB(200, 200, 200),
+				BgTop = Color3.fromRGB(24, 24, 24),
+				BgBottom = Color3.fromRGB(12, 12, 12),
+				Stroke = Color3.fromRGB(70, 70, 70),
+			},
+			Effects = { GradientDrift = false, Pulse = false, Shimmer = false },
+		},
+		Epic = {
+			DisplayName = "Epic",
+			DefaultThreat = 55,
+			Theme = {
+				Accent = Color3.fromRGB(162, 92, 255),
+				BgTop = Color3.fromRGB(34, 18, 52),
+				BgBottom = Color3.fromRGB(14, 8, 26),
+				Stroke = Color3.fromRGB(124, 79, 180),
+			},
+			Effects = { GradientDrift = true, Pulse = true, Shimmer = false },
+		},
+		Legendary = {
+			DisplayName = "Legendary",
+			DefaultThreat = 85,
+			Theme = {
+				Accent = Color3.fromRGB(255, 190, 92),
+				BgTop = Color3.fromRGB(50, 30, 12),
+				BgBottom = Color3.fromRGB(18, 10, 4),
+				Stroke = Color3.fromRGB(255, 195, 120),
+			},
+			Effects = { GradientDrift = true, Pulse = true, Shimmer = true },
+		},
+	},
+}
+
+function RarityConfig.getThreatTier(threat)
+	if threat >= 76 then
+		return "EXTREME"
+	elseif threat >= 51 then
+		return "HIGH"
+	elseif threat >= 26 then
+		return "MED"
+	end
+	return "LOW"
+end
+
+return RarityConfig]]></ProtectedString>
+					<string name="ScriptGuid">{e3314035-e0b8-49cc-99a6-acb3599eabdf}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">RarityConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXC69BF6BF5CBC4A39948B32B6D8086BBE">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[return {
+	NPCName = "Showcase NPC",
+	PromptActionText = "Talk",
+	PromptObjectText = "Contract Board",
+	BoardFlavor = "All contracts are binding until dawn.",
+	DayLines = {
+		Intro = {
+			"Another morning, another debt to the dark. Need tonight's contract?",
+			"I've got a fresh contract for the night. Interested?",
+		},
+		Responses = {
+			"Show tonight's contract",
+			"Not right now",
+		},
+		ContractResponseIndex = 1,
+		ExitLine = "Come back before sundown.",
+		AcceptLine = "Take it and survive the night.",
+	},
+	NightLines = {
+		Intro = {
+			"Night's fallen. No contracts now—just stay alive.",
+			"Too late for paperwork. Keep breathing until dawn.",
+		},
+		Responses = {
+			"Understood",
+		},
+		ExitLine = "Don't let the dark take you.",
+	},
+	RarityFlair = {
+		Legendary = {
+			"This one is marked in gold. Only the brave sign it.",
+			"A legendary contract... the board itself trembled.",
+		},
+	},
+}]]></ProtectedString>
+					<string name="ScriptGuid">{916fcf76-0afb-4884-b3a2-ae1a6add406f}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">DialogueConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX953C9A3A0933495F8B02D47C99DC8233">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[return {
+	Panel = {
+		Width = 620,
+		Height = 430,
+		Padding = 18,
+	},
+	Fonts = {
+		Header = Enum.Font.GothamBold,
+		Body = Enum.Font.Gotham,
+		Mono = Enum.Font.RobotoMono,
+	},
+	TextSizes = {
+		Header = 26,
+		SubHeader = 16,
+		Body = 15,
+		Small = 13,
+	},
+	Animations = {
+		OpenTime = 0.25,
+		CloseTime = 0.2,
+		GradientDriftTime = 12,
+		PulseTime = 2.4,
+		PulseScale = 1.04,
+		ShimmerInterval = 10,
+		ShimmerTime = 1.2,
+	},
+	Textures = {
+		Grain = "rbxassetid://0",
+		Shimmer = "rbxassetid://0",
+	},
+	Mobile = {
+		UseUIScale = true,
+		MinScale = 0.85,
+	},
+}]]></ProtectedString>
+					<string name="ScriptGuid">{98d0cfe5-a602-4c1c-9b75-4f0d46f9d0c7}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">UIConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXF0EA90F4D3894FAB93B268AC7A7C25DA">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[return {
+	{
+		Id = "daily_pages",
+		Name = "Lost Pages",
+		Rarity = "Common",
+		Threat = 15,
+		Description = "Scattered notes keep the spirits restless. Gather them before night deepens.",
+		Objectives = {
+			"Collect 8 cursed pages",
+			"Work together - progress is shared",
+		},
+		Type = "SharedCollectCount",
+		Settings = {
+			Count = 8,
+			PickupTag = "QuestPickup_Page",
+		},
+	},
+	{
+		Id = "butterfly_crate",
+		Name = "Butterfly Crate",
+		Rarity = "Legendary",
+		Description = "Retrieve the marked crate and deliver it to the warded drop zone.",
+		Objectives = {
+			"Locate the butterfly crate",
+			"Deliver it to the drop marker",
+		},
+		Type = "DeliverItem",
+		Settings = {
+			CrateTag = "QuestPickup_Crate",
+			DropTag = "QuestDrop_Crate",
+		},
+	},
+}]]></ProtectedString>
+					<string name="ScriptGuid">{2d5db30d-9156-49b3-813c-4c0d087788d3}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">QuestContractsConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBXB11EFFD617374FCB8ABE79813376A2BE">
+				<Properties>
+					<Content name="LinkedSource"><null></null></Content>
+					<ProtectedString name="Source"><![CDATA[return {
+	SurvivalCashBase = 75,
+	QuestCompleteCash = 250,
+	DistanceCashPerStud = 0.35,
+	MultipliersByRarity = {
+		Common = 1,
+		Epic = 1.2,
+		Legendary = 1.5,
+	},
+	Distance = {
+		MinSpeedToCount = 8,
+		SoftCapDistance = 900,
+		PostCapMultiplier = 0.25,
+	},
+}]]></ProtectedString>
+					<string name="ScriptGuid">{ac2f104d-024d-4d9c-98c5-a53117c8984f}</string>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">RewardsConfig</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+			</Item>
+			</Item>
+			<Item class="Folder" referent="RBX4C599AAF3335447DB0A1429AA637CA57">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Remotes</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="RemoteEvent" referent="RBXD0265922B64B4914A35E7AD0EAC3EDCD">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">RequestContractUI</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="RemoteEvent" referent="RBXD5C67301F3AB409FAAB68F31053FCED4">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">ShowContractUI</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="RemoteEvent" referent="RBXA1B4ECA8F0E54D8198BA8840FC78FB53">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">AcceptContract</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			<Item class="Folder" referent="RBXAC0EE19B2F2E4903A9066ED14728C792">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">State</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="StringValue" referent="RBX37712A480DB349658890DC1A07619BDD">
+					<Properties>
+						<string name="Value"></string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">ActiveContractId</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="IntValue" referent="RBXB82B124E412B4F0EB37B8AD356AFB9C8">
+					<Properties>
+						<int name="Value">0</int>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">DayIndex</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
+			</Item>
+			<Item class="Folder" referent="RBX634441ADF9CB4BD7ACE8025313172408">
+				<Properties>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">Ungroup in ServerScriptService</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="Script" referent="RBX328631DD4C6343EB818DDF504273AB60">
+					<Properties>
+						<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+local CollectionService = game:GetService("CollectionService")
+
+local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
+local Config = QuestSystem:WaitForChild("Config")
+local Remotes = QuestSystem:WaitForChild("Remotes")
+local State = QuestSystem:WaitForChild("State")
+
+local TimeConfig = require(Config.TimeConfig)
+local RarityConfig = require(Config.RarityConfig)
+local QuestContractsConfig = require(Config.QuestContractsConfig)
+local DialogueConfig = require(Config.DialogueConfig)
+local RewardsConfig = require(Config.RewardsConfig)
+
+local RequestContractUI = Remotes:WaitForChild("RequestContractUI")
+local ShowContractUI = Remotes:WaitForChild("ShowContractUI")
+local AcceptContract = Remotes:WaitForChild("AcceptContract")
+
+local ActiveContractId = State:WaitForChild("ActiveContractId")
+local DayIndex = State:WaitForChild("DayIndex")
+
+local function isDaytime(minutes)
+	return minutes >= TimeConfig.DayStartMinutes and minutes < TimeConfig.DayEndMinutes
+end
+
+local function getContractById(contractId)
+	for _, contract in ipairs(QuestContractsConfig) do
+		if contract.Id == contractId then
+			return contract
+		end
+	end
+	return nil
+end
+
+local function chooseDailyContract()
+	if #QuestContractsConfig == 0 then
+		warn("QuestContractsConfig has no contracts configured.")
+		return nil
+	end
+	local index = math.random(1, #QuestContractsConfig)
+	return QuestContractsConfig[index]
+end
+
+local questState = {
+	activeContract = nil,
+	progress = 0,
+	target = 0,
+	completed = false,
+	connections = {},
+	startTime = 0,
+	playerDistances = {},
+	playerLastPositions = {},
+}
+
+local function clearQuestConnections()
+	for _, connection in ipairs(questState.connections) do
+		connection:Disconnect()
+	end
+	questState.connections = {}
+end
+
+local function getPlayerFromHit(hit)
+	if not hit then
+		return nil
+	end
+	local character = hit:FindFirstAncestorOfClass("Model")
+	if not character then
+		return nil
+	end
+	return Players:GetPlayerFromCharacter(character)
+end
+
+local function getPickupBasePart(instance)
+	if instance:IsA("ProximityPrompt") then
+		local parent = instance.Parent
+		if parent and parent:IsA("BasePart") then
+			return parent
+		elseif parent and parent:IsA("Model") then
+			return parent.PrimaryPart or parent:FindFirstChildWhichIsA("BasePart")
+		end
+	elseif instance:IsA("BasePart") then
+		return instance
+	elseif instance:IsA("Model") then
+		return instance.PrimaryPart or instance:FindFirstChildWhichIsA("BasePart")
+	end
+	return nil
+end
+
+local function ensureNpcPrompt(isDay)
+	local npc = workspace:FindFirstChild("showcase npc")
+	if not npc then
+		warn("QuestService: NPC 'showcase npc' not found in Workspace.")
+		return
+	end
+
+	local templateFolder = workspace:FindFirstChild("Custom Prompts")
+	local promptTemplate = templateFolder and templateFolder:FindFirstChild("Prompt1")
+	if not promptTemplate then
+		warn("QuestService: Prompt1 template not found in Workspace > Custom Prompts.")
+		return
+	end
+
+	local templatePrompt = promptTemplate:FindFirstChildOfClass("ProximityPrompt")
+	if not templatePrompt then
+		warn("QuestService: ProximityPrompt missing from Prompt1 template.")
+		return
+	end
+
+	local existingPrompt = npc:FindFirstChildOfClass("ProximityPrompt")
+	if existingPrompt then
+		existingPrompt:Destroy()
+	end
+
+	local clonedPrompt = templatePrompt:Clone()
+	clonedPrompt.Name = "ProximityPrompt"
+	clonedPrompt.ActionText = DialogueConfig.PromptActionText
+	clonedPrompt.ObjectText = DialogueConfig.PromptObjectText
+	clonedPrompt.Parent = npc
+
+	CollectionService:AddTag(clonedPrompt, "NPCprompt")
+
+	local conf = clonedPrompt:FindFirstChild("CustomPromptConf")
+	if conf then
+		local custom = conf:FindFirstChild("CustomPrompt")
+		local nameValue = custom and custom:FindFirstChild("PromptName")
+		if nameValue and nameValue:IsA("StringValue") then
+			nameValue.Value = isDay and "Prompt1" or "Prompt2"
+		end
+	end
+end
+
+local function updatePromptStyle(isDay)
+	local npc = workspace:FindFirstChild("showcase npc")
+	if not npc then
+		return
+	end
+	local prompt = npc:FindFirstChildOfClass("ProximityPrompt")
+	if not prompt then
+		return
+	end
+	local conf = prompt:FindFirstChild("CustomPromptConf")
+	if conf then
+		local custom = conf:FindFirstChild("CustomPrompt")
+		local nameValue = custom and custom:FindFirstChild("PromptName")
+		if nameValue and nameValue:IsA("StringValue") then
+			nameValue.Value = isDay and "Prompt1" or "Prompt2"
+		end
+	end
+end
+
+local questHandlers = {}
+
+questHandlers.SharedCollectCount = {
+	start = function(contract)
+		questState.target = contract.Settings.Count or 1
+		questState.progress = 0
+		questState.completed = false
+		local pickupTag = contract.Settings.PickupTag
+		local collected = {}
+
+		local function registerPickup(instance)
+			if collected[instance] then
+				return
+			end
+			collected[instance] = true
+			questState.progress += 1
+			if questState.progress >= questState.target then
+				questState.completed = true
+			end
+		end
+
+		local function connectInstance(instance)
+			local part = getPickupBasePart(instance)
+			if not part then
+				return
+			end
+			if instance:IsA("ProximityPrompt") then
+				local connection = instance.Triggered:Connect(function()
+					registerPickup(instance)
+				end)
+				table.insert(questState.connections, connection)
+			else
+				local connection = part.Touched:Connect(function(hit)
+					local player = getPlayerFromHit(hit)
+					if player then
+						registerPickup(instance)
+					end
+				end)
+				table.insert(questState.connections, connection)
+			end
+		end
+
+		for _, instance in ipairs(CollectionService:GetTagged(pickupTag)) do
+			connectInstance(instance)
+		end
+
+		local added = CollectionService:GetInstanceAddedSignal(pickupTag):Connect(connectInstance)
+		table.insert(questState.connections, added)
+	end,
+	stop = function()
+		clearQuestConnections()
+	end,
+}
+
+questHandlers.DeliverItem = {
+	start = function(contract)
+		questState.completed = false
+		questState.progress = 0
+		questState.target = 1
+
+		local crateTag = contract.Settings.CrateTag
+		local dropTag = contract.Settings.DropTag
+
+		local function markPicked(crate, player)
+			if not player then
+				return
+			end
+			crate:SetAttribute("QuestCarrierUserId", player.UserId)
+		end
+
+		local function connectCrate(crate)
+			local part = getPickupBasePart(crate)
+			if not part then
+				return
+			end
+
+			local prompt = crate:FindFirstChildOfClass("ProximityPrompt")
+			if prompt then
+				local connection = prompt.Triggered:Connect(function(player)
+					markPicked(crate, player)
+				end)
+				table.insert(questState.connections, connection)
+			else
+				local connection = part.Touched:Connect(function(hit)
+					local player = getPlayerFromHit(hit)
+					if player then
+						markPicked(crate, player)
+					end
+				end)
+				table.insert(questState.connections, connection)
+			end
+		end
+
+		local function getCrateFromHit(hit)
+			local node = hit
+			while node and node ~= workspace do
+				if CollectionService:HasTag(node, crateTag) then
+					return node
+				end
+				node = node.Parent
+			end
+			return nil
+		end
+
+		local function connectDrop(drop)
+			local part = getPickupBasePart(drop)
+			if not part then
+				return
+			end
+			local connection = part.Touched:Connect(function(hit)
+				local crate = getCrateFromHit(hit)
+				if crate and crate:GetAttribute("QuestCarrierUserId") then
+					questState.completed = true
+					questState.progress = 1
+				end
+			end)
+			table.insert(questState.connections, connection)
+		end
+
+		for _, crate in ipairs(CollectionService:GetTagged(crateTag)) do
+			connectCrate(crate)
+		end
+		for _, drop in ipairs(CollectionService:GetTagged(dropTag)) do
+			connectDrop(drop)
+		end
+
+		table.insert(questState.connections, CollectionService:GetInstanceAddedSignal(crateTag):Connect(connectCrate))
+		table.insert(questState.connections, CollectionService:GetInstanceAddedSignal(dropTag):Connect(connectDrop))
+	end,
+	stop = function()
+		clearQuestConnections()
+	end,
+}
+
+local function startNightlyQuest(contract)
+	clearQuestConnections()
+	questState.activeContract = contract
+	questState.startTime = os.time()
+	questState.playerDistances = {}
+	questState.playerLastPositions = {}
+
+	local handler = questHandlers[contract.Type]
+	if handler and handler.start then
+		handler.start(contract)
+	else
+		warn("QuestService: No handler for quest type:", contract.Type)
+	end
+end
+
+local function stopNightlyQuest()
+	local contract = questState.activeContract
+	if contract then
+		local handler = questHandlers[contract.Type]
+		if handler and handler.stop then
+			handler.stop()
+		end
+	end
+	questState.activeContract = nil
+	questState.completed = false
+	questState.progress = 0
+	questState.target = 0
+end
+
+local function calculateDistanceCash(distance)
+	local cfg = RewardsConfig.Distance
+	local softCap = cfg.SoftCapDistance
+	local postCapMultiplier = cfg.PostCapMultiplier
+	if distance <= softCap then
+		return distance * RewardsConfig.DistanceCashPerStud
+	end
+	local capped = softCap * RewardsConfig.DistanceCashPerStud
+	local remaining = distance - softCap
+	return capped + (remaining * RewardsConfig.DistanceCashPerStud * postCapMultiplier)
+end
+
+local function awardCash(player, amount)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local cash = leaderstats:FindFirstChild("Cash") or leaderstats:FindFirstChild("Money") or leaderstats:FindFirstChild("Coins")
+		if cash and (cash:IsA("NumberValue") or cash:IsA("IntValue")) then
+			cash.Value += math.floor(amount)
+			return
+		end
+	end
+	player:SetAttribute("DailyContractCash", math.floor((player:GetAttribute("DailyContractCash") or 0) + amount))
+end
+
+local function payoutNightRewards()
+	local contract = questState.activeContract
+	if not contract then
+		return
+	end
+	local rarityMultiplier = RewardsConfig.MultipliersByRarity[contract.Rarity] or 1
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		local distance = questState.playerDistances[player] or 0
+		local survivalCash = RewardsConfig.SurvivalCashBase
+		local completionCash = questState.completed and RewardsConfig.QuestCompleteCash or 0
+		local distanceCash = calculateDistanceCash(distance)
+		local total = (survivalCash + completionCash + distanceCash) * rarityMultiplier
+		awardCash(player, total)
+	end
+end
+
+local function updateDistanceTracking()
+	local cfg = RewardsConfig.Distance
+	for _, player in ipairs(Players:GetPlayers()) do
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root then
+			local last = questState.playerLastPositions[player]
+			if last then
+				local delta = (root.Position - last)
+				local distance = delta.Magnitude
+				local speed = distance
+				if speed >= cfg.MinSpeedToCount then
+					questState.playerDistances[player] = (questState.playerDistances[player] or 0) + distance
+				end
+			end
+			questState.playerLastPositions[player] = root.Position
+		end
+	end
+end
+
+local function getResolvedContractData(player)
+	local contract = getContractById(ActiveContractId.Value)
+	if not contract then
+		return nil
+	end
+
+	local rarityData = RarityConfig.Rarities[contract.Rarity]
+	local threat = contract.Threat or (rarityData and rarityData.DefaultThreat) or 0
+	local accepted = player:GetAttribute("AcceptedContractId") == contract.Id and player:GetAttribute("AcceptedContractDay") == DayIndex.Value
+
+	return {
+		Id = contract.Id,
+		Name = contract.Name,
+		Description = contract.Description,
+		Objectives = contract.Objectives,
+		Rarity = contract.Rarity,
+		Threat = threat,
+		DayIndex = DayIndex.Value,
+		Accepted = accepted,
+		Rewards = {
+			Survival = RewardsConfig.SurvivalCashBase,
+			Completion = RewardsConfig.QuestCompleteCash,
+			Distance = RewardsConfig.DistanceCashPerStud,
+		},
+	FlavorLine = DialogueConfig.BoardFlavor,
+	}
+end
+
+RequestContractUI.OnServerEvent:Connect(function(player)
+	local minutes = Lighting:GetMinutesAfterMidnight()
+	if not isDaytime(minutes) then
+		return
+	end
+
+	local data = getResolvedContractData(player)
+	if data then
+		ShowContractUI:FireClient(player, data)
+	end
+end)
+
+AcceptContract.OnServerEvent:Connect(function(player, contractId)
+	if contractId ~= ActiveContractId.Value then
+		return
+	end
+
+	local minutes = Lighting:GetMinutesAfterMidnight()
+	if not isDaytime(minutes) then
+		return
+	end
+
+	player:SetAttribute("AcceptedContractId", contractId)
+	player:SetAttribute("AcceptedContractDay", DayIndex.Value)
+end)
+
+local function rollNewContract()
+	local contract = chooseDailyContract()
+	if contract then
+		ActiveContractId.Value = contract.Id
+	end
+end
+
+local lastIsDay = isDaytime(Lighting:GetMinutesAfterMidnight())
+
+if lastIsDay then
+	DayIndex.Value = math.max(DayIndex.Value, 1)
+	if ActiveContractId.Value == "" then
+		rollNewContract()
+	end
+else
+	DayIndex.Value = DayIndex.Value == 0 and 0 or DayIndex.Value
+end
+
+ensureNpcPrompt(lastIsDay)
+
+if not lastIsDay then
+	local contract = getContractById(ActiveContractId.Value)
+	if contract then
+		startNightlyQuest(contract)
+	end
+end
+
+task.spawn(function()
+	while true do
+		local minutes = Lighting:GetMinutesAfterMidnight()
+		local isDay = isDaytime(minutes)
+
+		if isDay ~= lastIsDay then
+			if isDay then
+				DayIndex.Value += 1
+				rollNewContract()
+				updatePromptStyle(true)
+				payoutNightRewards()
+				stopNightlyQuest()
+			else
+				local contract = getContractById(ActiveContractId.Value)
+				if contract then
+					startNightlyQuest(contract)
+				end
+				updatePromptStyle(false)
+			end
+			lastIsDay = isDay
+		end
+
+		if not isDay and questState.activeContract then
+			updateDistanceTracking()
+		end
+
+		task.wait(1)
+	end
+end)
+
+Players.PlayerAdded:Connect(function(player)
+	questState.playerDistances[player] = 0
+	questState.playerLastPositions[player] = nil
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	questState.playerDistances[player] = nil
+	questState.playerLastPositions[player] = nil
+end)]]></ProtectedString>
+						<bool name="Disabled">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<token name="RunContext">0</token>
+						<string name="ScriptGuid">{ecf9d165-df18-40d3-b880-163a8e8ab171}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestService</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
 		<Item class="Folder" referent="RBX0DDABB3ECDAF4FC09AD4CCBA05C2290E">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
@@ -10486,6 +11343,1089 @@ updateTextSize()]]></ProtectedString>
 				</Item>
 			</Item>
 		</Item>
+			<Item class="ScreenGui" referent="RBX475A9C9828584B119426DD856D33AAF2">
+				<Properties>
+					<bool name="ClipToDeviceSafeArea">true</bool>
+					<int name="DisplayOrder">10</int>
+					<token name="SafeAreaCompatibility">1</token>
+					<token name="ScreenInsets">2</token>
+					<bool name="Enabled">false</bool>
+					<bool name="ResetOnSpawn">true</bool>
+					<token name="ZIndexBehavior">1</token>
+					<bool name="AutoLocalize">true</bool>
+					<Ref name="RootLocalizationTable">null</Ref>
+					<token name="SelectionBehaviorDown">0</token>
+					<token name="SelectionBehaviorLeft">0</token>
+					<token name="SelectionBehaviorRight">0</token>
+					<token name="SelectionBehaviorUp">0</token>
+					<bool name="SelectionGroup">false</bool>
+					<BinaryString name="AttributesSerialize"></BinaryString>
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<string name="Name">QuestContractGui</string>
+					<int64 name="SourceAssetId">-1</int64>
+					<BinaryString name="Tags"></BinaryString>
+				</Properties>
+				<Item class="Frame" referent="RBXE71D7E701FC94977837D781001BADEF0">
+					<Properties>
+						<token name="Style">0</token>
+						<bool name="Active">false</bool>
+						<Vector2 name="AnchorPoint">
+							<X>0.5</X>
+							<Y>0.5</Y>
+						</Vector2>
+						<Color3 name="BackgroundColor3">
+							<R>0.1</R>
+							<G>0.1</G>
+							<B>0.1</B>
+						</Color3>
+						<float name="BackgroundTransparency">0.1</float>
+						<int name="BorderSizePixel">0</int>
+						<bool name="ClipsDescendants">false</bool>
+						<bool name="Interactable">true</bool>
+						<UDim2 name="Position">
+							<XS>0.5</XS>
+							<XO>0</XO>
+							<YS>0.5</YS>
+							<YO>0</YO>
+						</UDim2>
+						<UDim2 name="Size">
+							<XS>0</XS>
+							<XO>620</XO>
+							<YS>0</YS>
+							<YO>430</YO>
+						</UDim2>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">ContractBoard</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="UICorner" referent="RBXBFD8B2AF29DB496EAF60A42F05BF5433">
+						<Properties>
+							<UDim name="CornerRadius">
+								<S>0</S>
+								<O>10</O>
+							</UDim>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">UICorner</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="UIStroke" referent="RBX97D79D08C7D34B309C15E4CFB6CE37D6">
+						<Properties>
+							<Color3 name="Color">
+								<R>0.25</R>
+								<G>0.25</G>
+								<B>0.25</B>
+							</Color3>
+							<float name="Transparency">0.2</float>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">UIStroke</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="UIGradient" referent="RBXEAE13884A47D42188A3CAF015B3672F4">
+						<Properties>
+							<float name="Rotation">0</float>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">UIGradient</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+					<Item class="Frame" referent="RBX0044E22C24C943029088D7901DEEA70E">
+						<Properties>
+							<token name="Style">0</token>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">
+								<R>0.08</R>
+								<G>0.08</G>
+								<B>0.08</B>
+							</Color3>
+							<float name="BackgroundTransparency">0.1</float>
+							<int name="BorderSizePixel">0</int>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>0</YO>
+							</UDim2>
+							<UDim2 name="Size">
+								<XS>1</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>110</YO>
+							</UDim2>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">Header</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+						<Item class="UIStroke" referent="RBX7C3229B7F4FD49F3AF60385D580E73EF">
+							<Properties>
+								<Color3 name="Color">
+									<R>0.2</R>
+									<G>0.2</G>
+									<B>0.2</B>
+								</Color3>
+								<float name="Transparency">0.6</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">UIStroke</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX949F22CA7C8E4176A36B74CBE6B0F87E">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/GothamSSm.json</url></Family>
+									<Weight>700</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">COMMON</string>
+								<Color3 name="TextColor3">
+									<R>1</R>
+									<G>1</G>
+									<B>1</B>
+								</Color3>
+								<bool name="TextScaled">false</bool>
+								<float name="TextSize">14</float>
+								<Color3 name="TextStrokeColor3">
+									<R>0</R>
+									<G>0</G>
+									<B>0</B>
+								</Color3>
+								<float name="TextStrokeTransparency">0.6</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>12</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>120</XO>
+									<YS>0</YS>
+									<YO>24</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">RarityBadge</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX2815A6E227DB4478AF4C079C8F61AF7B">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/GothamSSm.json</url></Family>
+									<Weight>700</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">Contract Name</string>
+								<Color3 name="TextColor3">
+									<R>1</R>
+									<G>1</G>
+									<B>1</B>
+								</Color3>
+								<bool name="TextWrapped">true</bool>
+								<float name="TextSize">24</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>40</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-100</XO>
+									<YS>0</YS>
+									<YO>36</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">QuestName</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX249B8BAB9AC442909461C9850FD49540">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/Roboto.json</url></Family>
+									<Weight>500</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">DAY CONTRACT</string>
+								<Color3 name="TextColor3">
+									<R>0.8</R>
+									<G>0.8</G>
+									<B>0.8</B>
+								</Color3>
+								<float name="TextSize">13</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>78</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-120</XO>
+									<YS>0</YS>
+									<YO>20</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">DayLabel</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextButton" referent="RBX574CFBA3888445E7A1980A66B053D4DD">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/SourceSansPro.json</url></Family>
+									<Weight>700</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">✕</string>
+								<Color3 name="TextColor3">
+									<R>1</R>
+									<G>1</G>
+									<B>1</B>
+								</Color3>
+								<float name="TextSize">18</float>
+								<Color3 name="BackgroundColor3">
+									<R>0.15</R>
+									<G>0.15</G>
+									<B>0.15</B>
+								</Color3>
+								<UDim2 name="Position">
+									<XS>1</XS>
+									<XO>-42</XO>
+									<YS>0</YS>
+									<YO>12</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>30</XO>
+									<YS>0</YS>
+									<YO>30</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">CloseButton</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+							<Item class="UICorner" referent="RBX9D6864E00DBF4B83B9F9A522367CC45C">
+								<Properties>
+									<UDim name="CornerRadius">
+										<S>0</S>
+										<O>6</O>
+									</UDim>
+									<BinaryString name="AttributesSerialize"></BinaryString>
+									<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+									<bool name="DefinesCapabilities">false</bool>
+									<string name="Name">UICorner</string>
+									<int64 name="SourceAssetId">-1</int64>
+									<BinaryString name="Tags"></BinaryString>
+								</Properties>
+							</Item>
+						</Item>
+						<Item class="ImageLabel" referent="RBX6C7899788CFA4E97BC5E11DEE17ED359">
+							<Properties>
+								<Content name="Image"><url>rbxassetid://0</url></Content>
+								<float name="ImageTransparency">0.4</float>
+								<Color3 name="ImageColor3">
+									<R>1</R>
+									<G>1</G>
+									<B>1</B>
+								</Color3>
+								<UDim2 name="Position">
+									<XS>-0.3</XS>
+									<XO>0</XO>
+									<YS>0</YS>
+									<YO>0</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0.3</XS>
+									<XO>0</XO>
+									<YS>1</YS>
+									<YO>0</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<bool name="Visible">false</bool>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">Shimmer</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+					</Item>
+					<Item class="Frame" referent="RBXCD9E6DF3EC114145A5FF45C3A4424CA6">
+						<Properties>
+							<token name="Style">0</token>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">
+								<R>0.07</R>
+								<G>0.07</G>
+								<B>0.07</B>
+							</Color3>
+							<float name="BackgroundTransparency">0.15</float>
+							<int name="BorderSizePixel">0</int>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>110</YO>
+							</UDim2>
+							<UDim2 name="Size">
+								<XS>1</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>210</YO>
+							</UDim2>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">Body</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+						<Item class="UIStroke" referent="RBX2C5C17567583421CBD233F27BF2A4CB5">
+							<Properties>
+								<Color3 name="Color">
+									<R>0.2</R>
+									<G>0.2</G>
+									<B>0.2</B>
+								</Color3>
+								<float name="Transparency">0.7</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">UIStroke</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX85418E2FD97C4B5DB27D531697D552B3">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/Roboto.json</url></Family>
+									<Weight>400</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">Description</string>
+								<Color3 name="TextColor3">
+									<R>0.9</R>
+									<G>0.9</G>
+									<B>0.9</B>
+								</Color3>
+								<bool name="TextWrapped">true</bool>
+								<float name="TextSize">15</float>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>12</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-36</XO>
+									<YS>0</YS>
+									<YO>42</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">Description</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="ScrollingFrame" referent="RBXC1B81018C0E448B7B4B482790227FEF2">
+							<Properties>
+								<bool name="Active">true</bool>
+								<Color3 name="BackgroundColor3">
+									<R>0.1</R>
+									<G>0.1</G>
+									<B>0.1</B>
+								</Color3>
+								<float name="BackgroundTransparency">0.4</float>
+								<int name="BorderSizePixel">0</int>
+								<bool name="ClipsDescendants">true</bool>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>64</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-36</XO>
+									<YS>0</YS>
+									<YO>96</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">Objectives</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+							<Item class="UIListLayout" referent="RBXA659CBB7827342B19CE9D0CDC0C533FB">
+								<Properties>
+									<UDim name="Padding">
+										<S>0</S>
+										<O>4</O>
+									</UDim>
+									<token name="FillDirection">0</token>
+									<token name="HorizontalAlignment">0</token>
+									<token name="SortOrder">2</token>
+									<token name="VerticalAlignment">0</token>
+									<BinaryString name="AttributesSerialize"></BinaryString>
+									<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+									<bool name="DefinesCapabilities">false</bool>
+									<string name="Name">UIListLayout</string>
+									<int64 name="SourceAssetId">-1</int64>
+									<BinaryString name="Tags"></BinaryString>
+								</Properties>
+							</Item>
+							<Item class="UICorner" referent="RBXE7662D6FB7D84253AF4FD7A1A5BACCEA">
+								<Properties>
+									<UDim name="CornerRadius">
+										<S>0</S>
+										<O>6</O>
+									</UDim>
+									<BinaryString name="AttributesSerialize"></BinaryString>
+									<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+									<bool name="DefinesCapabilities">false</bool>
+									<string name="Name">UICorner</string>
+									<int64 name="SourceAssetId">-1</int64>
+									<BinaryString name="Tags"></BinaryString>
+								</Properties>
+							</Item>
+						</Item>
+						<Item class="TextLabel" referent="RBX894A0005FAFD41FD9FFC23816C2238EF">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/Roboto.json</url></Family>
+									<Weight>300</Weight>
+									<Style>Italic</Style>
+								</Font>
+								<string name="Text"></string>
+								<Color3 name="TextColor3">
+									<R>0.7</R>
+									<G>0.7</G>
+									<B>0.7</B>
+								</Color3>
+								<float name="TextSize">13</float>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>166</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-36</XO>
+									<YS>0</YS>
+									<YO>22</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">FlavorLine</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+					</Item>
+					<Item class="Frame" referent="RBXF72EA2105D164E0FA08171E19A645B9E">
+						<Properties>
+							<token name="Style">0</token>
+							<bool name="Active">false</bool>
+							<Color3 name="BackgroundColor3">
+								<R>0.06</R>
+								<G>0.06</G>
+								<B>0.06</B>
+							</Color3>
+							<float name="BackgroundTransparency">0.15</float>
+							<int name="BorderSizePixel">0</int>
+							<UDim2 name="Position">
+								<XS>0</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>320</YO>
+							</UDim2>
+							<UDim2 name="Size">
+								<XS>1</XS>
+								<XO>0</XO>
+								<YS>0</YS>
+								<YO>110</YO>
+							</UDim2>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">Footer</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+						<Item class="UIStroke" referent="RBXE37BF85A0C3148F6B2F2EDDD548F4C3D">
+							<Properties>
+								<Color3 name="Color">
+									<R>0.2</R>
+									<G>0.2</G>
+									<B>0.2</B>
+								</Color3>
+								<float name="Transparency">0.7</float>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">UIStroke</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="Frame" referent="RBX9E28D702E9DF41BBB173BB98D455A7F2">
+							<Properties>
+								<Color3 name="BackgroundColor3">
+									<R>0.2</R>
+									<G>0.2</G>
+									<B>0.2</B>
+								</Color3>
+								<float name="BackgroundTransparency">0.3</float>
+								<int name="BorderSizePixel">0</int>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>18</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>220</XO>
+									<YS>0</YS>
+									<YO>16</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">ThreatBar</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+							<Item class="Frame" referent="RBXBD0F5898E6774C65AFCBAC03746930C4">
+								<Properties>
+									<Color3 name="BackgroundColor3">
+										<R>0.9</R>
+										<G>0.4</G>
+										<B>0.2</B>
+									</Color3>
+									<float name="BackgroundTransparency">0</float>
+									<int name="BorderSizePixel">0</int>
+									<UDim2 name="Size">
+										<XS>0.5</XS>
+										<XO>0</XO>
+										<YS>1</YS>
+										<YO>0</YO>
+									</UDim2>
+									<BinaryString name="AttributesSerialize"></BinaryString>
+									<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+									<bool name="DefinesCapabilities">false</bool>
+									<string name="Name">Fill</string>
+									<int64 name="SourceAssetId">-1</int64>
+									<BinaryString name="Tags"></BinaryString>
+								</Properties>
+								<Item class="UICorner" referent="RBXB4C20D9282DA4C9494CCB13486E879C2">
+									<Properties>
+										<UDim name="CornerRadius">
+											<S>0</S>
+											<O>6</O>
+										</UDim>
+										<BinaryString name="AttributesSerialize"></BinaryString>
+										<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+										<bool name="DefinesCapabilities">false</bool>
+										<string name="Name">UICorner</string>
+										<int64 name="SourceAssetId">-1</int64>
+										<BinaryString name="Tags"></BinaryString>
+									</Properties>
+								</Item>
+							</Item>
+						</Item>
+						<Item class="TextLabel" referent="RBX5F9BD7A4E2CF484F9C84A4EE087EF081">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/Roboto.json</url></Family>
+									<Weight>700</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">THREAT: LOW</string>
+								<Color3 name="TextColor3">
+									<R>0.9</R>
+									<G>0.9</G>
+									<B>0.9</B>
+								</Color3>
+								<float name="TextSize">12</float>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>40</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>160</XO>
+									<YS>0</YS>
+									<YO>18</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">ThreatLabel</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX31E7060CF3164120B8FD2D0F498954DA">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/RobotoMono.json</url></Family>
+									<Weight>500</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">0</string>
+								<Color3 name="TextColor3">
+									<R>1</R>
+									<G>0.9</G>
+									<B>0.7</B>
+								</Color3>
+								<float name="TextSize">12</float>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>188</XO>
+									<YS>0</YS>
+									<YO>40</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>40</XO>
+									<YS>0</YS>
+									<YO>18</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">ThreatValue</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextLabel" referent="RBX4A5842D15FC24625A2C76119230F012C">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/Roboto.json</url></Family>
+									<Weight>400</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">Rewards:</string>
+								<Color3 name="TextColor3">
+									<R>0.85</R>
+									<G>0.85</G>
+									<B>0.85</B>
+								</Color3>
+								<float name="TextSize">12</float>
+								<int name="BorderSizePixel">0</int>
+								<float name="BackgroundTransparency">1</float>
+								<UDim2 name="Position">
+									<XS>0</XS>
+									<XO>18</XO>
+									<YS>0</YS>
+									<YO>66</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>1</XS>
+									<XO>-180</XO>
+									<YS>0</YS>
+									<YO>18</YO>
+								</UDim2>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">RewardsLabel</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+						</Item>
+						<Item class="TextButton" referent="RBXB662D7213DA54A4C923C07ABAE1A23B6">
+							<Properties>
+								<Font name="FontFace">
+									<Family><url>rbxasset://fonts/families/GothamSSm.json</url></Family>
+									<Weight>700</Weight>
+									<Style>Normal</Style>
+								</Font>
+								<string name="Text">ACCEPT CONTRACT</string>
+								<Color3 name="TextColor3">
+									<R>0.1</R>
+									<G>0.1</G>
+									<B>0.1</B>
+								</Color3>
+								<float name="TextSize">13</float>
+								<Color3 name="BackgroundColor3">
+									<R>0.95</R>
+									<G>0.8</G>
+									<B>0.55</B>
+								</Color3>
+								<UDim2 name="Position">
+									<XS>1</XS>
+									<XO>-170</XO>
+									<YS>0</YS>
+									<YO>58</YO>
+								</UDim2>
+								<UDim2 name="Size">
+									<XS>0</XS>
+									<XO>150</XO>
+									<YS>0</YS>
+									<YO>32</YO>
+								</UDim2>
+								<int name="BorderSizePixel">0</int>
+								<BinaryString name="AttributesSerialize"></BinaryString>
+								<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+								<bool name="DefinesCapabilities">false</bool>
+								<string name="Name">AcceptButton</string>
+								<int64 name="SourceAssetId">-1</int64>
+								<BinaryString name="Tags"></BinaryString>
+							</Properties>
+							<Item class="UICorner" referent="RBX3E81B26732C24B78AD1340FDE3171661">
+								<Properties>
+									<UDim name="CornerRadius">
+										<S>0</S>
+										<O>6</O>
+									</UDim>
+									<BinaryString name="AttributesSerialize"></BinaryString>
+									<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+									<bool name="DefinesCapabilities">false</bool>
+									<string name="Name">UICorner</string>
+									<int64 name="SourceAssetId">-1</int64>
+									<BinaryString name="Tags"></BinaryString>
+								</Properties>
+							</Item>
+						</Item>
+					</Item>
+				</Item>
+				<Item class="LocalScript" referent="RBX6B7C8C9361184A8AADB266EE3B9428B1">
+					<Properties>
+						<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
+local Config = QuestSystem:WaitForChild("Config")
+local Remotes = QuestSystem:WaitForChild("Remotes")
+
+local RarityConfig = require(Config.RarityConfig)
+local UIConfig = require(Config.UIConfig)
+
+local ShowContractUI = Remotes:WaitForChild("ShowContractUI")
+local AcceptContract = Remotes:WaitForChild("AcceptContract")
+
+local screenGui = script.Parent
+local board = screenGui:WaitForChild("ContractBoard")
+local header = board:WaitForChild("Header")
+local body = board:WaitForChild("Body")
+local footer = board:WaitForChild("Footer")
+
+local rarityBadge = header:WaitForChild("RarityBadge")
+local questName = header:WaitForChild("QuestName")
+local dayLabel = header:WaitForChild("DayLabel")
+local closeButton = header:WaitForChild("CloseButton")
+local shimmer = header:WaitForChild("Shimmer")
+
+local description = body:WaitForChild("Description")
+local objectives = body:WaitForChild("Objectives")
+local objectivesLayout = objectives:WaitForChild("UIListLayout")
+local flavorLine = body:WaitForChild("FlavorLine")
+
+local threatBar = footer:WaitForChild("ThreatBar")
+local threatFill = threatBar:WaitForChild("Fill")
+local threatLabel = footer:WaitForChild("ThreatLabel")
+local threatValue = footer:WaitForChild("ThreatValue")
+local rewardsLabel = footer:WaitForChild("RewardsLabel")
+local acceptButton = footer:WaitForChild("AcceptButton")
+
+local boardGradient = board:FindFirstChildOfClass("UIGradient")
+local pulseTween
+local driftTween
+local shimmerActive = false
+local currentContractId
+
+local function applyUIConfig()
+	board.Size = UDim2.fromOffset(UIConfig.Panel.Width, UIConfig.Panel.Height)
+	rarityBadge.Font = UIConfig.Fonts.Body
+	rarityBadge.TextSize = UIConfig.TextSizes.Small
+	questName.Font = UIConfig.Fonts.Header
+	questName.TextSize = UIConfig.TextSizes.Header
+	dayLabel.Font = UIConfig.Fonts.Body
+	dayLabel.TextSize = UIConfig.TextSizes.Small
+	description.Font = UIConfig.Fonts.Body
+	description.TextSize = UIConfig.TextSizes.Body
+	flavorLine.Font = UIConfig.Fonts.Body
+	flavorLine.TextSize = UIConfig.TextSizes.Small
+	threatLabel.Font = UIConfig.Fonts.Body
+	threatLabel.TextSize = UIConfig.TextSizes.Small
+	threatValue.Font = UIConfig.Fonts.Mono
+	threatValue.TextSize = UIConfig.TextSizes.Small
+	rewardsLabel.Font = UIConfig.Fonts.Body
+	rewardsLabel.TextSize = UIConfig.TextSizes.Small
+	acceptButton.Font = UIConfig.Fonts.Header
+	acceptButton.TextSize = UIConfig.TextSizes.Small
+end
+
+local function setupMobileScale()
+	if not UIConfig.Mobile.UseUIScale then
+		return
+	end
+	local uiScale = board:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+	uiScale.Parent = board
+	local reference = Vector2.new(1920, 1080)
+	local function updateScale()
+		local size = screenGui.AbsoluteSize
+		local scaleValue = math.min(size.X / reference.X, size.Y / reference.Y)
+		uiScale.Scale = math.clamp(scaleValue, UIConfig.Mobile.MinScale, 1)
+	end
+	updateScale()
+	screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateScale)
+end
+
+applyUIConfig()
+setupMobileScale()
+
+local function clearObjectives()
+	for _, child in ipairs(objectives:GetChildren()) do
+		if child:IsA("TextLabel") then
+			child:Destroy()
+		end
+	end
+end
+
+local function stopEffects()
+	if pulseTween then
+		pulseTween:Cancel()
+		pulseTween = nil
+	end
+	if driftTween then
+		driftTween:Cancel()
+		driftTween = nil
+	end
+	shimmerActive = false
+	shimmer.Visible = false
+end
+
+local function startShimmer()
+	shimmerActive = true
+	shimmer.Visible = true
+
+	local function runOnce()
+		shimmer.Position = UDim2.new(-0.3, 0, 0, 0)
+		local tween = TweenService:Create(shimmer, TweenInfo.new(UIConfig.Animations.ShimmerTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = UDim2.new(1.1, 0, 0, 0),
+		})
+		tween:Play()
+		tween.Completed:Wait()
+	end
+
+	task.spawn(function()
+		while shimmerActive do
+			runOnce()
+			task.wait(UIConfig.Animations.ShimmerInterval)
+		end
+	end)
+end
+
+local function applyTheme(rarity)
+	local data = RarityConfig.Rarities[rarity] or RarityConfig.Rarities.Common
+	rarityBadge.Text = data.DisplayName:upper()
+	rarityBadge.TextColor3 = data.Theme.Accent
+	questName.TextColor3 = Color3.new(1, 1, 1)
+	dayLabel.TextColor3 = Color3.new(0.85, 0.85, 0.85)
+
+	board.BackgroundColor3 = data.Theme.BgBottom
+	if boardGradient then
+		boardGradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, data.Theme.BgTop),
+			ColorSequenceKeypoint.new(1, data.Theme.BgBottom),
+		})
+	end
+
+	local stroke = board:FindFirstChildOfClass("UIStroke")
+	if stroke then
+		stroke.Color = data.Theme.Stroke
+	end
+
+	stopEffects()
+
+	if data.Effects.GradientDrift and boardGradient then
+		driftTween = TweenService:Create(boardGradient, TweenInfo.new(UIConfig.Animations.GradientDriftTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
+			Rotation = 360,
+		})
+		driftTween:Play()
+	end
+
+	if data.Effects.Pulse then
+		pulseTween = TweenService:Create(rarityBadge, TweenInfo.new(UIConfig.Animations.PulseTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+			Size = UDim2.new(0, rarityBadge.Size.X.Offset * UIConfig.Animations.PulseScale, 0, rarityBadge.Size.Y.Offset * UIConfig.Animations.PulseScale),
+		})
+		pulseTween:Play()
+	end
+
+	if data.Effects.Shimmer then
+		startShimmer()
+	end
+end
+
+local function setAcceptedState(accepted)
+	if accepted then
+		acceptButton.Text = "CONTRACT ACCEPTED"
+		acceptButton.AutoButtonColor = false
+		acceptButton.BackgroundTransparency = 0.35
+		acceptButton.Active = false
+	else
+		acceptButton.Text = "ACCEPT CONTRACT"
+		acceptButton.AutoButtonColor = true
+		acceptButton.BackgroundTransparency = 0
+		acceptButton.Active = true
+	end
+end
+
+local function openBoard()
+	board.Visible = true
+	board.Position = UDim2.new(0.5, 0, 0.52, 0)
+	board.AnchorPoint = Vector2.new(0.5, 0.5)
+	board.BackgroundTransparency = 0.1
+	local tween = TweenService:Create(board, TweenInfo.new(UIConfig.Animations.OpenTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+	})
+	tween:Play()
+end
+
+local function closeBoard()
+	stopEffects()
+	local tween = TweenService:Create(board, TweenInfo.new(UIConfig.Animations.CloseTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, 0, 0.55, 0),
+		BackgroundTransparency = 0.15,
+	})
+	tween:Play()
+	tween.Completed:Wait()
+	board.Visible = false
+	screenGui.Enabled = false
+end
+
+ShowContractUI.OnClientEvent:Connect(function(data)
+	if not data then
+		return
+	end
+
+	currentContractId = data.Id
+	screenGui.Enabled = true
+
+	questName.Text = data.Name
+	dayLabel.Text = string.format("DAY CONTRACT • %d", data.DayIndex)
+	description.Text = data.Description
+
+	clearObjectives()
+	for _, objective in ipairs(data.Objectives or {}) do
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.new(1, -10, 0, 18)
+		label.Font = UIConfig.Fonts.Body
+		label.TextSize = UIConfig.TextSizes.Body
+		label.TextColor3 = Color3.fromRGB(220, 220, 220)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Text = "• " .. objective
+		label.Parent = objectives
+	end
+
+	objectives.CanvasSize = UDim2.new(0, 0, 0, objectivesLayout.AbsoluteContentSize.Y + 6)
+
+	local threat = data.Threat or 0
+	threatFill.Size = UDim2.new(math.clamp(threat / 100, 0, 1), 0, 1, 0)
+	threatLabel.Text = string.format("THREAT: %s", RarityConfig.getThreatTier(threat))
+	threatValue.Text = tostring(threat)
+
+	rewardsLabel.Text = string.format("Rewards: %d survival + %d completion + %.2f/stud", data.Rewards.Survival, data.Rewards.Completion, data.Rewards.Distance)
+
+	if data.FlavorLine and data.FlavorLine ~= "" then
+		flavorLine.Text = data.FlavorLine
+		flavorLine.Visible = true
+	else
+		flavorLine.Text = ""
+		flavorLine.Visible = false
+	end
+
+	applyTheme(data.Rarity)
+	setAcceptedState(data.Accepted)
+
+	openBoard()
+end)
+
+acceptButton.MouseButton1Click:Connect(function()
+	if currentContractId then
+		AcceptContract:FireServer(currentContractId)
+		setAcceptedState(true)
+	end
+end)
+
+closeButton.MouseButton1Click:Connect(closeBoard)]]></ProtectedString>
+						<bool name="Disabled">false</bool>
+						<Content name="LinkedSource"><null></null></Content>
+						<token name="RunContext">0</token>
+						<string name="ScriptGuid">{1e07d0c4-7802-4470-bf5c-12948e9b62ba}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestContractController</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+			</Item>
 		<Item class="Folder" referent="RBXC674A4E905054A42804FEF97029BF6E3">
 			<Properties>
 				<BinaryString name="AttributesSerialize"></BinaryString>
@@ -12233,34 +14173,77 @@ updateTextSize()]]></ProtectedString>
 				</Item>
 				<Item class="Script" referent="RBXF1367D689AA14255A434B22F754E4A3A">
 					<Properties>
-						<ProtectedString name="Source"><![CDATA[-- services
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+						<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
 
---modules
 local DialogModule = require(ReplicatedStorage.DialogModule)
 
---references
-local player = game.Players.LocalPlayer
-local npc = script.Parent -- Reference to the NPC model
-local npcGui = npc:WaitForChild("Head"):WaitForChild("gui")
+local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
+local Config = QuestSystem:WaitForChild("Config")
+local State = QuestSystem:WaitForChild("State")
+local Remotes = QuestSystem:WaitForChild("Remotes")
+
+local TimeConfig = require(Config.TimeConfig)
+local DialogueConfig = require(Config.DialogueConfig)
+local QuestContractsConfig = require(Config.QuestContractsConfig)
+
+local RequestContractUI = Remotes:WaitForChild("RequestContractUI")
+local ActiveContractId = State:WaitForChild("ActiveContractId")
+
+local npc = script.Parent
 local prompt = npc:WaitForChild("ProximityPrompt")
 
-local dialogObject = DialogModule.new("Showcase NPC", npc, prompt)
-dialogObject:addDialog("This is a test prompt. What do you want", {"To subscribe to Supdoggy"})
+local dialogObject = DialogModule.new(DialogueConfig.NPCName, npc, prompt)
 
---
+local currentDialogData = nil
 
--- what happens when triggered
+local function isDaytime()
+	local minutes = Lighting:GetMinutesAfterMidnight()
+	return minutes >= TimeConfig.DayStartMinutes and minutes < TimeConfig.DayEndMinutes
+end
+
+local function getActiveContract()
+	for _, contract in ipairs(QuestContractsConfig) do
+		if contract.Id == ActiveContractId.Value then
+			return contract
+		end
+	end
+	return nil
+end
+
 prompt.Triggered:Connect(function(player)
+	local isDay = isDaytime()
+	local dialogData = isDay and DialogueConfig.DayLines or DialogueConfig.NightLines
+	currentDialogData = dialogData
+
+	local introLines = dialogData.Intro
+	local contract = isDay and getActiveContract()
+	if contract and contract.Rarity == "Legendary" then
+		local flair = DialogueConfig.RarityFlair and DialogueConfig.RarityFlair.Legendary
+		if flair and #flair > 0 then
+			introLines = flair
+		end
+	end
+
+	local intro = introLines[math.random(1, #introLines)]
+
+	dialogObject.dialogs = {}
+	dialogObject.dialogOption = 1
+	dialogObject:addDialog(intro, dialogData.Responses)
 	dialogObject:triggerDialog(player, 1)
 end)
 
--- logic to go through dialogs
-dialogObject.responded:Connect(function(responseNum, dialogNum)
-	if dialogNum == 1 then
-		if responseNum == 1 then
-			dialogObject:hideGui("You're very smart")
-		end
+dialogObject.responded:Connect(function(responseNum)
+	if not currentDialogData then
+		return
+	end
+
+	local isDay = isDaytime()
+	if isDay and responseNum == (currentDialogData.ContractResponseIndex or 1) then
+		RequestContractUI:FireServer()
+		dialogObject:hideGui(DialogueConfig.DayLines.AcceptLine or "Contract accepted.")
+	else
+		dialogObject:hideGui(currentDialogData.ExitLine or "Stay safe out there.")
 	end
 end)]]></ProtectedString>
 						<bool name="Disabled">false</bool>
