@@ -11754,21 +11754,21 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 640,
-	PanelHeight = 350,
+	PanelHeight = 300,
 	PanelPositionY = 0.37,
 	PanelCornerRadius = 14,
 	PanelPadding = {
-	Top = 20,
-	Bottom = 18,
+		Top = 16,
+		Bottom = 12,
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 8,
+	LayoutSpacing = 6,
 	TitleHeight = 28,
 	SubtitleHeight = 16,
-	InfoGroupHeight = 96,
-	RewardGroupHeight = 88,
-	ContentScale = 1.08,
+	InfoGroupHeight = 100,
+	RewardGroupHeight = 76,
+	ContentScale = 1.1,
 	PatternImage = "rbxassetid://126294497128009",
 	PatternTransparency = 0.9,
 	PatternTileScale = 0.25,
@@ -11913,10 +11913,11 @@ local function buildUi()
 	local statusStack = Instance.new("Frame")
 	statusStack.Name = "StatusStack"
 	statusStack.BackgroundTransparency = 1
-	statusStack.Size = UDim2.new(0, 180, 0, 44)
-	statusStack.Position = UDim2.new(1, -180, 0, 0)
-	statusStack.ZIndex = 7
-	statusStack.Parent = content
+	statusStack.Size = UDim2.new(0, 210, 0, 44)
+	statusStack.AnchorPoint = Vector2.new(1, 0)
+	statusStack.Position = UDim2.new(1, -UI_CONFIG.PanelPadding.Right, 0, UI_CONFIG.PanelPadding.Top)
+	statusStack.ZIndex = 9
+	statusStack.Parent = panel
 
 	local statusLayout = Instance.new("UIListLayout")
 	statusLayout.Padding = UDim.new(0, 2)
@@ -11924,14 +11925,14 @@ local function buildUi()
 	statusLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	statusLayout.Parent = statusStack
 
-	local statusLabel = createText(statusStack, "StatusLabel", "Returning at dawn…", 13, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Right)
+	local statusLabel = createText(statusStack, "StatusLabel", "Returning at dawn…", 14, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Right)
 	statusLabel.Size = UDim2.new(1, 0, 0, 20)
 	statusLabel.TextTransparency = 0.2
-	statusLabel.ZIndex = 7
+	statusLabel.ZIndex = 9
 
-	local countdownLabel = createText(statusStack, "CountdownLabel", "Closing in 04s", 14, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Right)
+	local countdownLabel = createText(statusStack, "CountdownLabel", "Closing in 04s", 16, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Right)
 	countdownLabel.Size = UDim2.new(1, 0, 0, 22)
-	countdownLabel.ZIndex = 7
+	countdownLabel.ZIndex = 9
 	UI.StatusLabel = statusLabel
 	UI.CountdownLabel = countdownLabel
 
@@ -11956,7 +11957,7 @@ local function buildUi()
 	infoGroup.Parent = outcomeContainer
 
 	local infoLayout = Instance.new("UIListLayout")
-	infoLayout.Padding = UDim.new(0, 8)
+	infoLayout.Padding = UDim.new(0, 10)
 	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	infoLayout.Parent = infoGroup
 
@@ -12002,7 +12003,7 @@ local function buildUi()
 	UI.QuestChip, UI.QuestValue = createChip(questRow)
 
 	local distanceRow = createInfoRow("Distance")
-		UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 19, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
+	UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 20, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
 		UI.DistanceValue.Size = UDim2.new(0.4, 0, 1, 0)
 		UI.DistanceValue.Position = UDim2.new(0.6, 0, 0, 0)
 		UI.DistanceValue.ZIndex = 7
