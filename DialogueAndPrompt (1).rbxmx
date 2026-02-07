@@ -11754,8 +11754,8 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 600,
-	PanelHeight = 360,
-	PanelPositionY = 0.38,
+	PanelHeight = 440,
+	PanelPositionY = 0.34,
 	PanelCornerRadius = 14,
 	PanelPadding = {
 		Top = 22,
@@ -11834,6 +11834,7 @@ local function buildUi()
 	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, UI_CONFIG.PanelHeight)
 	panel.BackgroundColor3 = COLORS.PanelBottom
 	panel.BackgroundTransparency = 0
+	panel.ClipsDescendants = true
 	panel.Visible = false
 	panel.ZIndex = 3
 	panel.Parent = gui
