@@ -11753,9 +11753,8 @@ local HOLD_DURATION = 4.0
 local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
-	PanelWidth = 600,
-	PanelHeight = 380,
-	PanelPositionY = 0.4,
+	PanelWidth = 620,
+	PanelPositionY = 0.36,
 	PanelCornerRadius = 14,
 	PanelPadding = {
 		Top = 20,
@@ -11763,16 +11762,16 @@ local UI_CONFIG = {
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 10,
+	LayoutSpacing = 12,
 	TitleHeight = 30,
 	SubtitleHeight = 20,
 	InfoGroupHeight = 92,
-	RewardGroupHeight = 96,
+	RewardGroupHeight = 110,
 	PatternImage = "rbxassetid://5553946656",
 	PatternTransparency = 0.92,
 	PatternTileScale = 1,
-	RewardTileWidth = 165,
-	RewardTileHeight = 88,
+	RewardTileWidth = 170,
+	RewardTileHeight = 92,
 	RewardTileTransparency = 0.35,
 }
 
@@ -11836,7 +11835,8 @@ local function buildUi()
 	panel.Name = "SummaryPanel"
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
 	panel.Position = UDim2.new(0.5, 0, UI_CONFIG.PanelPositionY, 0)
-	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, UI_CONFIG.PanelHeight)
+	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, 0)
+	panel.AutomaticSize = Enum.AutomaticSize.Y
 	panel.BackgroundColor3 = COLORS.PanelBottom
 	panel.BackgroundTransparency = 0
 	panel.ClipsDescendants = true
@@ -11864,7 +11864,7 @@ local function buildUi()
 	pattern.ScaleType = Enum.ScaleType.Tile
 	pattern.TileSize = UDim2.new(0, 220 * UI_CONFIG.PatternTileScale, 0, 220 * UI_CONFIG.PatternTileScale)
 	pattern.Size = UDim2.new(1, 0, 1, 0)
-	pattern.ZIndex = 4
+	pattern.ZIndex = 2
 	pattern.Parent = panel
 
 	local panelScale = Instance.new("UIScale")
@@ -11896,6 +11896,7 @@ local function buildUi()
 	infoGroup.Name = "InfoGroup"
 	infoGroup.BackgroundTransparency = 1
 	infoGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
+	infoGroup.AutomaticSize = Enum.AutomaticSize.Y
 	infoGroup.ZIndex = 5
 	infoGroup.Parent = panel
 
@@ -11929,6 +11930,7 @@ local function buildUi()
 	rewardGroup.Name = "RewardGroup"
 	rewardGroup.BackgroundTransparency = 1
 	rewardGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.RewardGroupHeight)
+	rewardGroup.AutomaticSize = Enum.AutomaticSize.Y
 	rewardGroup.ZIndex = 5
 	rewardGroup.Parent = panel
 
