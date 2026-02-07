@@ -10622,6 +10622,21 @@ local function recordPartDefaults(part)
 	end
 end
 
+local function recordSurfaceDefaults(surface)
+	if surface:GetAttribute("QuestDefaultTransparency") == nil then
+		surface:SetAttribute("QuestDefaultTransparency", surface.Transparency)
+	end
+end
+
+local function setSurfaceVisibility(surface, isActive)
+	recordSurfaceDefaults(surface)
+	if isActive then
+		surface.Transparency = surface:GetAttribute("QuestDefaultTransparency") or surface.Transparency
+	else
+		surface.Transparency = 1
+	end
+end
+
 local function setPartVisibility(part, isActive)
 	recordPartDefaults(part)
 	if isActive then
@@ -10634,6 +10649,12 @@ local function setPartVisibility(part, isActive)
 		part.CanCollide = false
 		part.CanTouch = false
 		part.CanQuery = false
+	end
+
+	for _, child in ipairs(part:GetChildren()) do
+		if child:IsA("Decal") or child:IsA("Texture") then
+			setSurfaceVisibility(child, isActive)
+		end
 	end
 end
 
@@ -11094,6 +11115,14 @@ local function awardXP(player, amount)
 	player:SetAttribute("DailyContractXP", math.floor((player:GetAttribute("DailyContractXP") or 0) + amount))
 end
 
+local function hasAcceptedContract(player)
+	local contract = questState.activeContract
+	if not contract then
+		return false
+	end
+	return player:GetAttribute("AcceptedContractId") == contract.Id and player:GetAttribute("AcceptedContractDay") == DayIndex.Value
+end
+
 local function payoutNightRewards()
 	local contract = questState.activeContract
 	if not contract then
@@ -11102,6 +11131,9 @@ local function payoutNightRewards()
 	local rarityMultiplier = RewardsConfig.MultipliersByRarity[contract.Rarity] or 1
 
 	for _, player in ipairs(Players:GetPlayers()) do
+		if not hasAcceptedContract(player) then
+			continue
+		end
 		local distance = questState.playerDistances[player] or 0
 		local survived = not questState.playerDied[player]
 		local survivalCash = RewardsConfig.SurvivalCashBase
