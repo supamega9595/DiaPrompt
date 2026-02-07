@@ -11808,29 +11808,6 @@ local function buildUi()
 		return
 	end
 
-	local overlay = Instance.new("Frame")
-	overlay.Name = "DimOverlay"
-	overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	overlay.BackgroundTransparency = 1
-	overlay.Size = UDim2.new(1, 0, 1, 0)
-	overlay.Position = UDim2.new(0, 0, 0, 0)
-	overlay.ZIndex = 1
-	overlay.Parent = gui
-
-	local panelShadow = Instance.new("ImageLabel")
-	panelShadow.Name = "Shadow"
-	panelShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-	panelShadow.Position = UDim2.new(0.5, 0, 0.45, 8)
-	panelShadow.Size = UDim2.new(0, 560, 0, 350)
-	panelShadow.Image = "rbxassetid://1316045217"
-	panelShadow.ImageColor3 = COLORS.Shadow
-	panelShadow.ImageTransparency = 0.75
-	panelShadow.BackgroundTransparency = 1
-	panelShadow.ScaleType = Enum.ScaleType.Slice
-	panelShadow.SliceCenter = Rect.new(10, 10, 118, 118)
-	panelShadow.ZIndex = 2
-	panelShadow.Parent = gui
-
 	local panel = Instance.new("Frame")
 	panel.Name = "SummaryPanel"
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -11858,7 +11835,7 @@ local function buildUi()
 	grain.Name = "Grain"
 	grain.BackgroundTransparency = 1
 	grain.Image = "rbxassetid://5553946656"
-	grain.ImageTransparency = 0.92
+	grain.ImageTransparency = 0.95
 	grain.Size = UDim2.new(1, 0, 1, 0)
 	grain.ZIndex = 4
 	grain.Parent = panel
@@ -11973,8 +11950,6 @@ local function buildUi()
 
 	UI.Panel = panel
 	UI.PanelScale = panelScale
-	UI.Overlay = overlay
-	UI.Shadow = panelShadow
 end
 
 local function setTextAlpha(alpha)
@@ -11987,12 +11962,6 @@ local function setTextAlpha(alpha)
 			end
 		end
 	end
-end
-
-local function tweenOverlay(target)
-	TweenService:Create(UI.Overlay, TweenInfo.new(OPEN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		BackgroundTransparency = target,
-	}):Play()
 end
 
 local function tweenScale(target, easingStyle, easingDirection, duration)
@@ -12028,10 +11997,8 @@ local function showSummary(data)
 	buildUi()
 	gui.Enabled = true
 	UI.Panel.Visible = true
-	UI.Shadow.Visible = true
-	UI.Overlay.BackgroundTransparency = 1
 	UI.PanelScale.Scale = 0.05
-	setTextAlpha(1)
+	setTextAlpha(0)
 
 	local survived = data and data.Survived
 	local completed = data and data.QuestCompleted
@@ -12053,7 +12020,6 @@ local function showSummary(data)
 	UI.XPValue.Text = "+0"
 	UI.WinsValue.Text = "+0"
 
-	tweenOverlay(0.5)
 	local openTween = tweenScale(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out, OPEN_TIME)
 
 	openTween.Completed:Connect(function()
@@ -12081,11 +12047,9 @@ local function showSummary(data)
 					task.delay(HOLD_DURATION, function()
 						local closeSound = ensureSound("CloseSound", "rbxassetid://73730549515939")
 						closeSound:Play()
-						tweenOverlay(1)
 						local closeTween = tweenScale(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.In, CLOSE_TIME)
 						closeTween.Completed:Connect(function()
 							UI.Panel.Visible = false
-							UI.Shadow.Visible = false
 							gui.Enabled = false
 						end)
 					end)
