@@ -11754,6 +11754,7 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 620,
+	PanelHeight = 380,
 	PanelPositionY = 0.36,
 	PanelCornerRadius = 14,
 	PanelPadding = {
@@ -11762,16 +11763,16 @@ local UI_CONFIG = {
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 12,
+	LayoutSpacing = 10,
 	TitleHeight = 30,
 	SubtitleHeight = 20,
 	InfoGroupHeight = 92,
-	RewardGroupHeight = 110,
+	RewardGroupHeight = 96,
 	PatternImage = "rbxassetid://5553946656",
 	PatternTransparency = 0.92,
 	PatternTileScale = 1,
-	RewardTileWidth = 170,
-	RewardTileHeight = 92,
+	RewardTileWidth = 165,
+	RewardTileHeight = 88,
 	RewardTileTransparency = 0.35,
 }
 
@@ -11835,8 +11836,7 @@ local function buildUi()
 	panel.Name = "SummaryPanel"
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
 	panel.Position = UDim2.new(0.5, 0, UI_CONFIG.PanelPositionY, 0)
-	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, 0)
-	panel.AutomaticSize = Enum.AutomaticSize.Y
+	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, UI_CONFIG.PanelHeight)
 	panel.BackgroundColor3 = COLORS.PanelBottom
 	panel.BackgroundTransparency = 0
 	panel.ClipsDescendants = true
@@ -11871,24 +11871,25 @@ local function buildUi()
 	panelScale.Scale = 0.05
 	panelScale.Parent = panel
 
-	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, UI_CONFIG.PanelPadding.Top)
-	padding.PaddingBottom = UDim.new(0, UI_CONFIG.PanelPadding.Bottom)
-	padding.PaddingLeft = UDim.new(0, UI_CONFIG.PanelPadding.Left)
-	padding.PaddingRight = UDim.new(0, UI_CONFIG.PanelPadding.Right)
-	padding.Parent = panel
+	local content = Instance.new("Frame")
+	content.Name = "Content"
+	content.BackgroundTransparency = 1
+	content.Position = UDim2.new(0, UI_CONFIG.PanelPadding.Left, 0, UI_CONFIG.PanelPadding.Top)
+	content.Size = UDim2.new(1, -(UI_CONFIG.PanelPadding.Left + UI_CONFIG.PanelPadding.Right), 1, -(UI_CONFIG.PanelPadding.Top + UI_CONFIG.PanelPadding.Bottom))
+	content.ZIndex = 5
+	content.Parent = panel
 
 	local stack = Instance.new("UIListLayout")
 	stack.Padding = UDim.new(0, UI_CONFIG.LayoutSpacing)
 	stack.SortOrder = Enum.SortOrder.LayoutOrder
-	stack.Parent = panel
+	stack.Parent = content
 
-	local title = createText(panel, "Title", "Night Summary", 26, Enum.FontWeight.Bold, COLORS.Gold, Enum.TextXAlignment.Left)
+	local title = createText(content, "Title", "Night Summary", 26, Enum.FontWeight.Bold, COLORS.Gold, Enum.TextXAlignment.Left)
 	title.Font = Enum.Font.GothamBold
 	title.Size = UDim2.new(1, 0, 0, UI_CONFIG.TitleHeight)
 	title.ZIndex = 5
 
-	local subtitle = createText(panel, "Subtitle", "Dawn breaks. Here's how the night went.", 14, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
+	local subtitle = createText(content, "Subtitle", "Dawn breaks. Here's how the night went.", 14, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
 	subtitle.Size = UDim2.new(1, 0, 0, UI_CONFIG.SubtitleHeight)
 	subtitle.ZIndex = 5
 
@@ -11896,9 +11897,8 @@ local function buildUi()
 	infoGroup.Name = "InfoGroup"
 	infoGroup.BackgroundTransparency = 1
 	infoGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
-	infoGroup.AutomaticSize = Enum.AutomaticSize.Y
 	infoGroup.ZIndex = 5
-	infoGroup.Parent = panel
+	infoGroup.Parent = content
 
 	local infoLayout = Instance.new("UIListLayout")
 	infoLayout.Padding = UDim.new(0, 8)
@@ -11930,9 +11930,8 @@ local function buildUi()
 	rewardGroup.Name = "RewardGroup"
 	rewardGroup.BackgroundTransparency = 1
 	rewardGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.RewardGroupHeight)
-	rewardGroup.AutomaticSize = Enum.AutomaticSize.Y
 	rewardGroup.ZIndex = 5
-	rewardGroup.Parent = panel
+	rewardGroup.Parent = content
 
 	local rewardLayout = Instance.new("UIListLayout")
 	rewardLayout.FillDirection = Enum.FillDirection.Horizontal
