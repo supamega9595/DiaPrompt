@@ -10299,10 +10299,10 @@ return RarityConfig]]></ProtectedString>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBXF0EA90F4D3894FAB93B268AC7A7C25DA">
-				<Properties>
-					<Content name="LinkedSource"><null></null></Content>
-					<ProtectedString name="Source"><![CDATA[return {
+				<Item class="ModuleScript" referent="RBXF0EA90F4D3894FAB93B268AC7A7C25DA">
+					<Properties>
+						<Content name="LinkedSource"><null></null></Content>
+						<ProtectedString name="Source"><![CDATA[return {
 	{
 		Id = "daily_pages",
 		Name = "Lost Pages",
@@ -10333,17 +10333,42 @@ return RarityConfig]]></ProtectedString>
 			CrateTag = "QuestPickup_Crate",
 			DropTag = "QuestDrop_Crate",
 		},
+		},
+	}]]></ProtectedString>
+						<string name="ScriptGuid">{2d5db30d-9156-49b3-813c-4c0d087788d3}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestContractsConfig</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX5467C6E1E3B944A59B5C49BC6B9F2A1B">
+					<Properties>
+						<Content name="LinkedSource"><null></null></Content>
+						<ProtectedString name="Source"><![CDATA[return {
+	ForceContract = true,
+	ForcedContractId = "daily_pages",
+	Pages = {
+		FolderName = "QuestSpawns",
+		PagesFolderName = "Pages",
+		PagesToSpawn = 8,
+		PickupTag = "QuestPickup_Page",
+	},
+	SummaryUI = {
+		AutoCloseSeconds = 10,
 	},
 }]]></ProtectedString>
-					<string name="ScriptGuid">{2d5db30d-9156-49b3-813c-4c0d087788d3}</string>
-					<BinaryString name="AttributesSerialize"></BinaryString>
-					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-					<bool name="DefinesCapabilities">false</bool>
-					<string name="Name">QuestContractsConfig</string>
-					<int64 name="SourceAssetId">-1</int64>
-					<BinaryString name="Tags"></BinaryString>
-				</Properties>
-			</Item>
+						<string name="ScriptGuid">{7c1fe18f-5c3e-4ff8-acde-9f2ca67b7a14}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestSettings</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
 			<Item class="ModuleScript" referent="RBXB11EFFD617374FCB8ABE79813376A2BE">
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
@@ -10351,6 +10376,11 @@ return RarityConfig]]></ProtectedString>
 	SurvivalCashBase = 75,
 	QuestCompleteCash = 250,
 	DistanceCashPerStud = 0.35,
+	XP = {
+		SurvivalBase = 90,
+		CompletionBonus = 160,
+		DistancePerStud = 0.02,
+	},
 	MultipliersByRarity = {
 		Common = 1,
 		Epic = 1.2,
@@ -10407,6 +10437,16 @@ return RarityConfig]]></ProtectedString>
 						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
 						<bool name="DefinesCapabilities">false</bool>
 						<string name="Name">AcceptContract</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="RemoteEvent" referent="RBX7F3D2B8F1C3D4E48A7E6B0C7EDE16B5A">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">ShowNightSummary</string>
 						<int64 name="SourceAssetId">-1</int64>
 						<BinaryString name="Tags"></BinaryString>
 					</Properties>
@@ -10471,10 +10511,12 @@ local RarityConfig = require(Config.RarityConfig)
 local QuestContractsConfig = require(Config.QuestContractsConfig)
 local DialogueConfig = require(Config.DialogueConfig)
 local RewardsConfig = require(Config.RewardsConfig)
+local QuestSettings = require(Config.QuestSettings)
 
 local RequestContractUI = Remotes:WaitForChild("RequestContractUI")
 local ShowContractUI = Remotes:WaitForChild("ShowContractUI")
 local AcceptContract = Remotes:WaitForChild("AcceptContract")
+local ShowNightSummary = Remotes:WaitForChild("ShowNightSummary")
 
 local ActiveContractId = State:WaitForChild("ActiveContractId")
 local DayIndex = State:WaitForChild("DayIndex")
@@ -10493,6 +10535,14 @@ local function getContractById(contractId)
 end
 
 local function chooseDailyContract()
+	if QuestSettings.ForceContract then
+		local forced = getContractById(QuestSettings.ForcedContractId)
+		if not forced then
+			warn("QuestService: Forced contract id not found:", QuestSettings.ForcedContractId)
+		else
+			return forced
+		end
+	end
 	if #QuestContractsConfig == 0 then
 		warn("QuestContractsConfig has no contracts configured.")
 		return nil
@@ -10510,6 +10560,9 @@ local questState = {
 	startTime = 0,
 	playerDistances = {},
 	playerLastPositions = {},
+	playerDied = {},
+	playerDeathConnections = {},
+	activePages = {},
 }
 
 local function clearQuestConnections()
@@ -10544,6 +10597,192 @@ local function getPickupBasePart(instance)
 		return instance.PrimaryPart or instance:FindFirstChildWhichIsA("BasePart")
 	end
 	return nil
+end
+
+local function getQuestPagesFolder()
+	local questSpawns = workspace:FindFirstChild(QuestSettings.Pages.FolderName)
+	if not questSpawns then
+		return nil
+	end
+	return questSpawns:FindFirstChild(QuestSettings.Pages.PagesFolderName)
+end
+
+local function recordPartDefaults(part)
+	if part:GetAttribute("QuestDefaultTransparency") == nil then
+		part:SetAttribute("QuestDefaultTransparency", part.Transparency)
+	end
+	if part:GetAttribute("QuestDefaultCanCollide") == nil then
+		part:SetAttribute("QuestDefaultCanCollide", part.CanCollide)
+	end
+	if part:GetAttribute("QuestDefaultCanTouch") == nil then
+		part:SetAttribute("QuestDefaultCanTouch", part.CanTouch)
+	end
+	if part:GetAttribute("QuestDefaultCanQuery") == nil then
+		part:SetAttribute("QuestDefaultCanQuery", part.CanQuery)
+	end
+end
+
+local function setPartVisibility(part, isActive)
+	recordPartDefaults(part)
+	if isActive then
+		part.Transparency = part:GetAttribute("QuestDefaultTransparency") or part.Transparency
+		part.CanCollide = part:GetAttribute("QuestDefaultCanCollide") ~= false
+		part.CanTouch = part:GetAttribute("QuestDefaultCanTouch") ~= false
+		part.CanQuery = part:GetAttribute("QuestDefaultCanQuery") ~= false
+	else
+		part.Transparency = 1
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+	end
+end
+
+local function setPromptVisibility(prompt, isActive)
+	if prompt:GetAttribute("QuestDefaultEnabled") == nil then
+		prompt:SetAttribute("QuestDefaultEnabled", prompt.Enabled)
+	end
+	if isActive then
+		prompt.Enabled = prompt:GetAttribute("QuestDefaultEnabled") ~= false
+	else
+		prompt.Enabled = false
+	end
+end
+
+local function setPageActive(page, isActive)
+	local parts = {}
+	if page:IsA("BasePart") then
+		table.insert(parts, page)
+	else
+		for _, descendant in ipairs(page:GetDescendants()) do
+			if descendant:IsA("BasePart") then
+				table.insert(parts, descendant)
+			end
+		end
+	end
+	for _, part in ipairs(parts) do
+		setPartVisibility(part, isActive)
+	end
+
+	local prompts = {}
+	if page:IsA("ProximityPrompt") then
+		table.insert(prompts, page)
+	else
+		for _, descendant in ipairs(page:GetDescendants()) do
+			if descendant:IsA("ProximityPrompt") then
+				table.insert(prompts, descendant)
+			end
+		end
+	end
+	for _, prompt in ipairs(prompts) do
+		setPromptVisibility(prompt, isActive)
+	end
+end
+
+local function removeQuestPickupTags(page)
+	if CollectionService:HasTag(page, QuestSettings.Pages.PickupTag) then
+		CollectionService:RemoveTag(page, QuestSettings.Pages.PickupTag)
+	end
+	for _, descendant in ipairs(page:GetDescendants()) do
+		if CollectionService:HasTag(descendant, QuestSettings.Pages.PickupTag) then
+			CollectionService:RemoveTag(descendant, QuestSettings.Pages.PickupTag)
+		end
+	end
+end
+
+local function applyQuestPickupTag(page)
+	local prompt = page:FindFirstChildOfClass("ProximityPrompt") or page:FindFirstChildWhichIsA("ProximityPrompt", true)
+	if prompt then
+		CollectionService:AddTag(prompt, QuestSettings.Pages.PickupTag)
+		return
+	end
+	CollectionService:AddTag(page, QuestSettings.Pages.PickupTag)
+end
+
+local function resetAllPages()
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return
+	end
+	for _, page in ipairs(folder:GetChildren()) do
+		if page:IsA("BasePart") or page:IsA("Model") then
+			removeQuestPickupTags(page)
+			setPageActive(page, false)
+		end
+	end
+	questState.activePages = {}
+end
+
+local function selectRandomPages()
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return {}
+	end
+	local pages = {}
+	for _, page in ipairs(folder:GetChildren()) do
+		if page:IsA("BasePart") or page:IsA("Model") then
+			table.insert(pages, page)
+		end
+	end
+	for i = #pages, 2, -1 do
+		local j = math.random(1, i)
+		pages[i], pages[j] = pages[j], pages[i]
+	end
+	local count = math.min(QuestSettings.Pages.PagesToSpawn or 8, #pages)
+	local selection = {}
+	for i = 1, count do
+		table.insert(selection, pages[i])
+	end
+	return selection
+end
+
+local function activatePageQuest()
+	resetAllPages()
+	local selection = selectRandomPages()
+	for _, page in ipairs(selection) do
+		setPageActive(page, true)
+		applyQuestPickupTag(page)
+	end
+	questState.activePages = selection
+end
+
+local function deactivatePageQuest()
+	resetAllPages()
+end
+
+local function hideCollectedPage(instance)
+	local page = instance
+	if instance:IsA("ProximityPrompt") then
+		page = instance.Parent
+	end
+	if page and page.Parent and page.Parent:IsA("Model") then
+		page = page.Parent
+	end
+	if page then
+		setPageActive(page, false)
+		removeQuestPickupTags(page)
+	end
+end
+
+local function registerDeathTracking(player)
+	local function onCharacterAdded(character)
+		local existing = questState.playerDeathConnections[player]
+		if existing then
+			existing:Disconnect()
+			questState.playerDeathConnections[player] = nil
+		end
+		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 5)
+		if humanoid then
+			local connection
+			connection = humanoid.Died:Connect(function()
+				questState.playerDied[player] = true
+			end)
+			questState.playerDeathConnections[player] = connection
+		end
+	end
+	player.CharacterAdded:Connect(onCharacterAdded)
+	if player.Character then
+		onCharacterAdded(player.Character)
+	end
 end
 
 local function ensureNpcPrompt(isDay)
@@ -10623,6 +10862,9 @@ questHandlers.SharedCollectCount = {
 				return
 			end
 			collected[instance] = true
+			if pickupTag == QuestSettings.Pages.PickupTag then
+				hideCollectedPage(instance)
+			end
 			questState.progress += 1
 			if questState.progress >= questState.target then
 				questState.completed = true
@@ -10748,12 +10990,19 @@ local function startNightlyQuest(contract)
 	questState.startTime = os.time()
 	questState.playerDistances = {}
 	questState.playerLastPositions = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		questState.playerDied[player] = false
+	end
 
 	local handler = questHandlers[contract.Type]
 	if handler and handler.start then
 		handler.start(contract)
 	else
 		warn("QuestService: No handler for quest type:", contract.Type)
+	end
+
+	if contract.Id == QuestSettings.ForcedContractId or (contract.Settings and contract.Settings.PickupTag == QuestSettings.Pages.PickupTag) then
+		activatePageQuest()
 	end
 end
 
@@ -10765,6 +11014,7 @@ local function stopNightlyQuest()
 			handler.stop()
 		end
 	end
+	deactivatePageQuest()
 	questState.activeContract = nil
 	questState.completed = false
 	questState.progress = 0
@@ -10783,6 +11033,19 @@ local function calculateDistanceCash(distance)
 	return capped + (remaining * RewardsConfig.DistanceCashPerStud * postCapMultiplier)
 end
 
+local function calculateXP(distance, survived, completed)
+	local xpConfig = RewardsConfig.XP or {}
+	local total = 0
+	if survived then
+		total += xpConfig.SurvivalBase or 0
+	end
+	if completed then
+		total += xpConfig.CompletionBonus or 0
+	end
+	total += distance * (xpConfig.DistancePerStud or 0)
+	return math.floor(total)
+end
+
 local function awardCash(player, amount)
 	local leaderstats = player:FindFirstChild("leaderstats")
 	if leaderstats then
@@ -10795,6 +11058,30 @@ local function awardCash(player, amount)
 	player:SetAttribute("DailyContractCash", math.floor((player:GetAttribute("DailyContractCash") or 0) + amount))
 end
 
+local function awardWins(player, amount)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local wins = leaderstats:FindFirstChild("Wins")
+		if wins and wins:IsA("IntValue") then
+			wins.Value += amount
+			return
+		end
+	end
+	player:SetAttribute("DailyContractWins", math.floor((player:GetAttribute("DailyContractWins") or 0) + amount))
+end
+
+local function awardXP(player, amount)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local xp = leaderstats:FindFirstChild("XP")
+		if xp and (xp:IsA("IntValue") or xp:IsA("NumberValue")) then
+			xp.Value += math.floor(amount)
+			return
+		end
+	end
+	player:SetAttribute("DailyContractXP", math.floor((player:GetAttribute("DailyContractXP") or 0) + amount))
+end
+
 local function payoutNightRewards()
 	local contract = questState.activeContract
 	if not contract then
@@ -10804,11 +11091,30 @@ local function payoutNightRewards()
 
 	for _, player in ipairs(Players:GetPlayers()) do
 		local distance = questState.playerDistances[player] or 0
+		local survived = not questState.playerDied[player]
 		local survivalCash = RewardsConfig.SurvivalCashBase
 		local completionCash = questState.completed and RewardsConfig.QuestCompleteCash or 0
 		local distanceCash = calculateDistanceCash(distance)
-		local total = (survivalCash + completionCash + distanceCash) * rarityMultiplier
-		awardCash(player, total)
+		local totalCash = (survivalCash + completionCash + distanceCash) * rarityMultiplier
+		local xpAward = calculateXP(distance, survived, questState.completed)
+		local winsAward = survived and 1 or 0
+
+		awardCash(player, totalCash)
+		if winsAward > 0 then
+			awardWins(player, winsAward)
+		end
+		if xpAward > 0 then
+			awardXP(player, xpAward)
+		end
+
+		ShowNightSummary:FireClient(player, {
+			Survived = survived,
+			QuestCompleted = questState.completed,
+			Distance = distance,
+			CashAwarded = totalCash,
+			XPAwarded = xpAward,
+			WinsAwarded = winsAward,
+		})
 	end
 end
 
@@ -10905,6 +11211,13 @@ else
 end
 
 ensureNpcPrompt(lastIsDay)
+if lastIsDay then
+	deactivatePageQuest()
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	registerDeathTracking(player)
+end
 
 if not lastIsDay then
 	local contract = getContractById(ActiveContractId.Value)
@@ -10946,11 +11259,19 @@ end)
 Players.PlayerAdded:Connect(function(player)
 	questState.playerDistances[player] = 0
 	questState.playerLastPositions[player] = nil
+	questState.playerDied[player] = false
+	registerDeathTracking(player)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
 	questState.playerDistances[player] = nil
 	questState.playerLastPositions[player] = nil
+	questState.playerDied[player] = nil
+	local connection = questState.playerDeathConnections[player]
+	if connection then
+		connection:Disconnect()
+		questState.playerDeathConnections[player] = nil
+	end
 end)]]></ProtectedString>
 						<bool name="Disabled">false</bool>
 						<Content name="LinkedSource"><null></null></Content>
@@ -11341,9 +11662,266 @@ updateTextSize()]]></ProtectedString>
 						</Item>
 					</Item>
 				</Item>
+				</Item>
 			</Item>
-		</Item>
-			<Item class="ScreenGui" referent="RBX475A9C9828584B119426DD856D33AAF2">
+				<Item class="ScreenGui" referent="RBX7B73B8C2CEB947DE8A90B7A7A95D8E2E">
+					<Properties>
+						<bool name="ClipToDeviceSafeArea">true</bool>
+						<int name="DisplayOrder">50</int>
+						<token name="SafeAreaCompatibility">1</token>
+						<token name="ScreenInsets">2</token>
+						<bool name="Enabled">true</bool>
+						<bool name="ResetOnSpawn">false</bool>
+						<token name="ZIndexBehavior">1</token>
+						<bool name="AutoLocalize">true</bool>
+						<Ref name="RootLocalizationTable">null</Ref>
+						<token name="SelectionBehaviorDown">0</token>
+						<token name="SelectionBehaviorLeft">0</token>
+						<token name="SelectionBehaviorRight">0</token>
+						<token name="SelectionBehaviorUp">0</token>
+						<bool name="SelectionGroup">false</bool>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">NightSummaryGui</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="LocalScript" referent="RBX978F1D57E1C744F3A4F8DCD09D05E6C8">
+						<Properties>
+							<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
+local Remotes = QuestSystem:WaitForChild("Remotes")
+local Config = QuestSystem:WaitForChild("Config")
+
+local QuestSettings = require(Config:WaitForChild("QuestSettings"))
+local ShowNightSummary = Remotes:WaitForChild("ShowNightSummary")
+
+local gui = script.Parent
+
+local function createRow(parent, labelText)
+	local row = Instance.new("Frame")
+	row.Name = labelText .. "Row"
+	row.BackgroundTransparency = 1
+	row.Size = UDim2.new(1, 0, 0, 28)
+	row.Parent = parent
+
+	local label = Instance.new("TextLabel")
+	label.Name = "Label"
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamSemibold
+	label.TextSize = 18
+	label.TextColor3 = Color3.fromRGB(212, 175, 55)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Size = UDim2.new(0.6, 0, 1, 0)
+	label.Text = labelText
+	label.Parent = row
+
+	local value = Instance.new("TextLabel")
+	value.Name = "Value"
+	value.BackgroundTransparency = 1
+	value.Font = Enum.Font.Gotham
+	value.TextSize = 18
+	value.TextColor3 = Color3.fromRGB(245, 245, 245)
+	value.TextXAlignment = Enum.TextXAlignment.Right
+	value.Size = UDim2.new(0.4, 0, 1, 0)
+	value.Position = UDim2.new(0.6, 0, 0, 0)
+	value.Text = "--"
+	value.Parent = row
+
+	return value
+end
+
+local function buildUi()
+	if gui:FindFirstChild("SummaryFrame") then
+		return gui.SummaryFrame
+	end
+
+	local frame = Instance.new("Frame")
+	frame.Name = "SummaryFrame"
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
+	frame.Position = UDim2.new(0.5, 0, 0.4, 0)
+	frame.Size = UDim2.new(0, 520, 0, 300)
+	frame.BackgroundColor3 = Color3.fromRGB(14, 12, 10)
+	frame.BackgroundTransparency = 1
+	frame.Visible = false
+	frame.Parent = gui
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(212, 175, 55)
+	stroke.Thickness = 2
+	stroke.Transparency = 1
+	stroke.Parent = frame
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = frame
+
+	local scale = Instance.new("UIScale")
+	scale.Scale = 0.95
+	scale.Parent = frame
+
+	local title = Instance.new("TextLabel")
+	title.Name = "Title"
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 26
+	title.TextColor3 = Color3.fromRGB(212, 175, 55)
+	title.Text = "Night Summary"
+	title.Size = UDim2.new(1, -40, 0, 34)
+	title.Position = UDim2.new(0, 20, 0, 16)
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextTransparency = 1
+	title.Parent = frame
+
+	local subtitle = Instance.new("TextLabel")
+	subtitle.Name = "Subtitle"
+	subtitle.BackgroundTransparency = 1
+	subtitle.Font = Enum.Font.Gotham
+	subtitle.TextSize = 14
+	subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+	subtitle.Text = "Dawn breaks. Here's how the night went."
+	subtitle.Size = UDim2.new(1, -40, 0, 22)
+	subtitle.Position = UDim2.new(0, 20, 0, 50)
+	subtitle.TextXAlignment = Enum.TextXAlignment.Left
+	subtitle.TextTransparency = 1
+	subtitle.Parent = frame
+
+	local divider = Instance.new("Frame")
+	divider.Name = "Divider"
+	divider.Size = UDim2.new(1, -40, 0, 2)
+	divider.Position = UDim2.new(0, 20, 0, 80)
+	divider.BackgroundColor3 = Color3.fromRGB(212, 175, 55)
+	divider.BackgroundTransparency = 1
+	divider.Parent = frame
+
+	local content = Instance.new("Frame")
+	content.Name = "Content"
+	content.BackgroundTransparency = 1
+	content.Size = UDim2.new(1, -40, 0, 190)
+	content.Position = UDim2.new(0, 20, 0, 96)
+	content.Parent = frame
+
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 8)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = content
+
+	local survivedValue = createRow(content, "Survived")
+	local questValue = createRow(content, "Quest Completed")
+	local distanceValue = createRow(content, "Distance")
+	local cashValue = createRow(content, "Cash Earned")
+	local xpValue = createRow(content, "XP Earned")
+	local winsValue = createRow(content, "Wins")
+
+	frame:SetAttribute("SurvivedValuePath", survivedValue:GetFullName())
+	frame:SetAttribute("QuestValuePath", questValue:GetFullName())
+	frame:SetAttribute("DistanceValuePath", distanceValue:GetFullName())
+	frame:SetAttribute("CashValuePath", cashValue:GetFullName())
+	frame:SetAttribute("XPValuePath", xpValue:GetFullName())
+	frame:SetAttribute("WinsValuePath", winsValue:GetFullName())
+
+	return frame
+end
+
+local function resolveValue(frame, attributeName)
+	local path = frame:GetAttribute(attributeName)
+	if not path then
+		return nil
+	end
+	local node = gui
+	for segment in string.gmatch(path, "[^%.]+") do
+		if node and node.Name == segment then
+			continue
+		end
+		node = node and node:FindFirstChild(segment)
+	end
+	return node
+end
+
+local function tweenTransparency(frame, transparency)
+	local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local targets = {BackgroundTransparency = transparency}
+	TweenService:Create(frame, tweenInfo, targets):Play()
+	for _, child in ipairs(frame:GetDescendants()) do
+		if child:IsA("TextLabel") then
+			TweenService:Create(child, tweenInfo, {TextTransparency = transparency}):Play()
+		elseif child:IsA("Frame") and child.Name == "Divider" then
+			TweenService:Create(child, tweenInfo, {BackgroundTransparency = transparency}):Play()
+		elseif child:IsA("UIStroke") then
+			TweenService:Create(child, tweenInfo, {Transparency = transparency}):Play()
+		end
+	end
+	local scale = frame:FindFirstChildOfClass("UIScale")
+	if scale then
+		TweenService:Create(scale, tweenInfo, {Scale = transparency == 0 and 1 or 0.95}):Play()
+	end
+end
+
+local function showSummary(data)
+	local frame = buildUi()
+	local survivedValue = resolveValue(frame, "SurvivedValuePath")
+	local questValue = resolveValue(frame, "QuestValuePath")
+	local distanceValue = resolveValue(frame, "DistanceValuePath")
+	local cashValue = resolveValue(frame, "CashValuePath")
+	local xpValue = resolveValue(frame, "XPValuePath")
+	local winsValue = resolveValue(frame, "WinsValuePath")
+
+	local survived = data and data.Survived
+	local completed = data and data.QuestCompleted
+
+	if survivedValue then
+		survivedValue.Text = survived and "YES" or "NO"
+		survivedValue.TextColor3 = survived and Color3.fromRGB(110, 220, 140) or Color3.fromRGB(230, 92, 92)
+	end
+	if questValue then
+		questValue.Text = completed and "YES" or "NO"
+		questValue.TextColor3 = completed and Color3.fromRGB(212, 175, 55) or Color3.fromRGB(200, 200, 200)
+	end
+	if distanceValue then
+		distanceValue.Text = string.format("%d studs", math.floor((data and data.Distance) or 0))
+	end
+	if cashValue then
+		cashValue.Text = string.format("+%d", math.floor((data and data.CashAwarded) or 0))
+	end
+	if xpValue then
+		xpValue.Text = string.format("+%d", math.floor((data and data.XPAwarded) or 0))
+	end
+	if winsValue then
+		winsValue.Text = string.format("+%d", math.floor((data and data.WinsAwarded) or 0))
+	end
+
+	frame.Visible = true
+	tweenTransparency(frame, 0)
+
+	local closeSeconds = QuestSettings.SummaryUI.AutoCloseSeconds or 10
+	task.delay(closeSeconds, function()
+		if frame.Visible then
+			tweenTransparency(frame, 1)
+			task.delay(0.4, function()
+				frame.Visible = false
+			end)
+		end
+	end)
+end
+
+ShowNightSummary.OnClientEvent:Connect(showSummary)]]></ProtectedString>
+							<bool name="Disabled">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<token name="RunContext">0</token>
+							<string name="ScriptGuid">{c3b5b1a6-9c66-4f8b-9dc2-b9d9ecbc8c29}</string>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">NightSummaryController</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="ScreenGui" referent="RBX475A9C9828584B119426DD856D33AAF2">
 				<Properties>
 					<bool name="ClipToDeviceSafeArea">true</bool>
 					<int name="DisplayOrder">10</int>
