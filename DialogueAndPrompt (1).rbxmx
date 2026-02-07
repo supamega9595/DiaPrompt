@@ -10678,6 +10678,21 @@ local function setPageActive(page, isActive)
 	end
 end
 
+local function findPageRoot(instance)
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return nil
+	end
+	local node = instance
+	while node and node ~= workspace do
+		if node.Parent == folder then
+			return node
+		end
+		node = node.Parent
+	end
+	return nil
+end
+
 local function removeQuestPickupTags(page)
 	if CollectionService:HasTag(page, QuestSettings.Pages.PickupTag) then
 		CollectionService:RemoveTag(page, QuestSettings.Pages.PickupTag)
@@ -10737,6 +10752,9 @@ end
 
 local function activatePageQuest()
 	resetAllPages()
+	if isDaytime(Lighting:GetMinutesAfterMidnight()) then
+		return
+	end
 	local selection = selectRandomPages()
 	for _, page in ipairs(selection) do
 		setPageActive(page, true)
@@ -10750,13 +10768,7 @@ local function deactivatePageQuest()
 end
 
 local function hideCollectedPage(instance)
-	local page = instance
-	if instance:IsA("ProximityPrompt") then
-		page = instance.Parent
-	end
-	if page and page.Parent and page.Parent:IsA("Model") then
-		page = page.Parent
-	end
+	local page = findPageRoot(instance) or instance
 	if page then
 		setPageActive(page, false)
 		removeQuestPickupTags(page)
@@ -11211,9 +11223,7 @@ else
 end
 
 ensureNpcPrompt(lastIsDay)
-if lastIsDay then
-	deactivatePageQuest()
-end
+resetAllPages()
 
 for _, player in ipairs(Players:GetPlayers()) do
 	registerDeathTracking(player)
@@ -11734,6 +11744,8 @@ local function createRow(parent, labelText)
 	return value
 end
 
+local valueLabels = {}
+
 local function buildUi()
 	if gui:FindFirstChild("SummaryFrame") then
 		return gui.SummaryFrame
@@ -11809,36 +11821,14 @@ local function buildUi()
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = content
 
-	local survivedValue = createRow(content, "Survived")
-	local questValue = createRow(content, "Quest Completed")
-	local distanceValue = createRow(content, "Distance")
-	local cashValue = createRow(content, "Cash Earned")
-	local xpValue = createRow(content, "XP Earned")
-	local winsValue = createRow(content, "Wins")
-
-	frame:SetAttribute("SurvivedValuePath", survivedValue:GetFullName())
-	frame:SetAttribute("QuestValuePath", questValue:GetFullName())
-	frame:SetAttribute("DistanceValuePath", distanceValue:GetFullName())
-	frame:SetAttribute("CashValuePath", cashValue:GetFullName())
-	frame:SetAttribute("XPValuePath", xpValue:GetFullName())
-	frame:SetAttribute("WinsValuePath", winsValue:GetFullName())
+	valueLabels.Survived = createRow(content, "Survived")
+	valueLabels.QuestCompleted = createRow(content, "Quest Completed")
+	valueLabels.Distance = createRow(content, "Distance")
+	valueLabels.Cash = createRow(content, "Cash Earned")
+	valueLabels.XP = createRow(content, "XP Earned")
+	valueLabels.Wins = createRow(content, "Wins")
 
 	return frame
-end
-
-local function resolveValue(frame, attributeName)
-	local path = frame:GetAttribute(attributeName)
-	if not path then
-		return nil
-	end
-	local node = gui
-	for segment in string.gmatch(path, "[^%.]+") do
-		if node and node.Name == segment then
-			continue
-		end
-		node = node and node:FindFirstChild(segment)
-	end
-	return node
 end
 
 local function tweenTransparency(frame, transparency)
@@ -11862,12 +11852,12 @@ end
 
 local function showSummary(data)
 	local frame = buildUi()
-	local survivedValue = resolveValue(frame, "SurvivedValuePath")
-	local questValue = resolveValue(frame, "QuestValuePath")
-	local distanceValue = resolveValue(frame, "DistanceValuePath")
-	local cashValue = resolveValue(frame, "CashValuePath")
-	local xpValue = resolveValue(frame, "XPValuePath")
-	local winsValue = resolveValue(frame, "WinsValuePath")
+	local survivedValue = valueLabels.Survived
+	local questValue = valueLabels.QuestCompleted
+	local distanceValue = valueLabels.Distance
+	local cashValue = valueLabels.Cash
+	local xpValue = valueLabels.XP
+	local winsValue = valueLabels.Wins
 
 	local survived = data and data.Survived
 	local completed = data and data.QuestCompleted
