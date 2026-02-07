@@ -11752,6 +11752,25 @@ local COUNT_DURATION = 1.0
 local HOLD_DURATION = 4.0
 local CLOSE_TIME = 0.2
 
+local UI_CONFIG = {
+	PanelWidth = 600,
+	PanelHeight = 360,
+	PanelPositionY = 0.38,
+	PanelCornerRadius = 14,
+	PanelPadding = {
+		Top = 22,
+		Bottom = 26,
+		Left = 30,
+		Right = 30,
+	},
+	PatternImage = "rbxassetid://5553946656",
+	PatternTransparency = 0.92,
+	PatternTileScale = 1,
+	RewardTileWidth = 165,
+	RewardTileHeight = 92,
+	RewardTileTransparency = 0.35,
+}
+
 local COLORS = {
 	Gold = Color3.fromRGB(212, 175, 55),
 	GoldSoft = Color3.fromRGB(197, 164, 50),
@@ -11811,8 +11830,8 @@ local function buildUi()
 	local panel = Instance.new("Frame")
 	panel.Name = "SummaryPanel"
 	panel.AnchorPoint = Vector2.new(0.5, 0.5)
-	panel.Position = UDim2.new(0.5, 0, 0.45, 0)
-	panel.Size = UDim2.new(0, 540, 0, 330)
+	panel.Position = UDim2.new(0.5, 0, UI_CONFIG.PanelPositionY, 0)
+	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, UI_CONFIG.PanelHeight)
 	panel.BackgroundColor3 = COLORS.PanelBottom
 	panel.BackgroundTransparency = 0
 	panel.Visible = false
@@ -11820,7 +11839,7 @@ local function buildUi()
 	panel.Parent = gui
 
 	local panelCorner = Instance.new("UICorner")
-	panelCorner.CornerRadius = UDim.new(0, 14)
+	panelCorner.CornerRadius = UDim.new(0, UI_CONFIG.PanelCornerRadius)
 	panelCorner.Parent = panel
 
 	local panelGradient = Instance.new("UIGradient")
@@ -11831,24 +11850,26 @@ local function buildUi()
 	panelGradient.Rotation = 90
 	panelGradient.Parent = panel
 
-	local grain = Instance.new("ImageLabel")
-	grain.Name = "Grain"
-	grain.BackgroundTransparency = 1
-	grain.Image = "rbxassetid://5553946656"
-	grain.ImageTransparency = 0.95
-	grain.Size = UDim2.new(1, 0, 1, 0)
-	grain.ZIndex = 4
-	grain.Parent = panel
+	local pattern = Instance.new("ImageLabel")
+	pattern.Name = "Pattern"
+	pattern.BackgroundTransparency = 1
+	pattern.Image = UI_CONFIG.PatternImage
+	pattern.ImageTransparency = UI_CONFIG.PatternTransparency
+	pattern.ScaleType = Enum.ScaleType.Tile
+	pattern.TileSize = UDim2.new(0, 220 * UI_CONFIG.PatternTileScale, 0, 220 * UI_CONFIG.PatternTileScale)
+	pattern.Size = UDim2.new(1, 0, 1, 0)
+	pattern.ZIndex = 4
+	pattern.Parent = panel
 
 	local panelScale = Instance.new("UIScale")
 	panelScale.Scale = 0.05
 	panelScale.Parent = panel
 
 	local padding = Instance.new("UIPadding")
-	padding.PaddingTop = UDim.new(0, 22)
-	padding.PaddingBottom = UDim.new(0, 24)
-	padding.PaddingLeft = UDim.new(0, 28)
-	padding.PaddingRight = UDim.new(0, 28)
+	padding.PaddingTop = UDim.new(0, UI_CONFIG.PanelPadding.Top)
+	padding.PaddingBottom = UDim.new(0, UI_CONFIG.PanelPadding.Bottom)
+	padding.PaddingLeft = UDim.new(0, UI_CONFIG.PanelPadding.Left)
+	padding.PaddingRight = UDim.new(0, UI_CONFIG.PanelPadding.Right)
 	padding.Parent = panel
 
 	local stack = Instance.new("UIListLayout")
@@ -11858,15 +11879,17 @@ local function buildUi()
 
 	local title = createText(panel, "Title", "Night Summary", 26, Enum.FontWeight.Bold, COLORS.Gold, Enum.TextXAlignment.Left)
 	title.Font = Enum.Font.GothamBold
+	title.Size = UDim2.new(1, 0, 0, 30)
 	title.ZIndex = 5
 
 	local subtitle = createText(panel, "Subtitle", "Dawn breaks. Here's how the night went.", 14, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
+	subtitle.Size = UDim2.new(1, 0, 0, 20)
 	subtitle.ZIndex = 5
 
 	local infoGroup = Instance.new("Frame")
 	infoGroup.Name = "InfoGroup"
 	infoGroup.BackgroundTransparency = 1
-	infoGroup.Size = UDim2.new(1, 0, 0, 96)
+	infoGroup.Size = UDim2.new(1, 0, 0, 104)
 	infoGroup.ZIndex = 5
 	infoGroup.Parent = panel
 
@@ -11899,7 +11922,7 @@ local function buildUi()
 	local rewardGroup = Instance.new("Frame")
 	rewardGroup.Name = "RewardGroup"
 	rewardGroup.BackgroundTransparency = 1
-	rewardGroup.Size = UDim2.new(1, 0, 0, 108)
+	rewardGroup.Size = UDim2.new(1, 0, 0, 112)
 	rewardGroup.ZIndex = 5
 	rewardGroup.Parent = panel
 
@@ -11915,8 +11938,8 @@ local function buildUi()
 		local tile = Instance.new("Frame")
 		tile.Name = name
 		tile.BackgroundColor3 = Color3.fromRGB(24, 21, 19)
-		tile.BackgroundTransparency = 0.35
-		tile.Size = UDim2.new(0, 150, 1, 0)
+		tile.BackgroundTransparency = UI_CONFIG.RewardTileTransparency
+		tile.Size = UDim2.new(0, UI_CONFIG.RewardTileWidth, 0, UI_CONFIG.RewardTileHeight)
 		tile.ZIndex = 6
 		tile.Parent = rewardGroup
 
