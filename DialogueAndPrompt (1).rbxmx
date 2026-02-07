@@ -11753,27 +11753,29 @@ local HOLD_DURATION = 4.0
 local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
-	PanelWidth = 620,
-	PanelHeight = 360,
-	PanelPositionY = 0.36,
+	PanelWidth = 640,
+	PanelHeight = 340,
+	PanelPositionY = 0.37,
 	PanelCornerRadius = 14,
 	PanelPadding = {
-		Top = 22,
-		Bottom = 20,
+		Top = 18,
+		Bottom = 16,
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 8,
-	TitleHeight = 30,
-	SubtitleHeight = 18,
-	InfoGroupHeight = 92,
-	RewardGroupHeight = 92,
+	LayoutSpacing = 6,
+	TitleHeight = 28,
+	SubtitleHeight = 16,
+	InfoGroupHeight = 88,
+	RewardGroupHeight = 84,
 	PatternImage = "rbxassetid://5553946656",
-	PatternTransparency = 0.92,
+	PatternTransparency = 0.9,
 	PatternTileScale = 1,
-	RewardTileWidth = 168,
-	RewardTileHeight = 84,
-	RewardTileTransparency = 0.35,
+	RewardTileWidth = 176,
+	RewardTileHeight = 80,
+	RewardTileTransparency = 0.28,
+	PanelStrokeThickness = 2,
+	PanelStrokeTransparency = 0.15,
 }
 
 local COLORS = {
@@ -11849,6 +11851,13 @@ local function buildUi()
 	local panelCorner = Instance.new("UICorner")
 	panelCorner.CornerRadius = UDim.new(0, UI_CONFIG.PanelCornerRadius)
 	panelCorner.Parent = panel
+
+	local panelStroke = Instance.new("UIStroke")
+	panelStroke.Name = "GoldOutline"
+	panelStroke.Color = COLORS.Gold
+	panelStroke.Thickness = UI_CONFIG.PanelStrokeThickness
+	panelStroke.Transparency = UI_CONFIG.PanelStrokeTransparency
+	panelStroke.Parent = panel
 
 	local panelGradient = Instance.new("UIGradient")
 	panelGradient.Color = ColorSequence.new({
