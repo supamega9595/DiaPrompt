@@ -11761,14 +11761,15 @@ local UI_CONFIG = {
 		Top = 16,
 		Bottom = 12,
 		Left = 30,
-		Right = 30,
+		Right = 40,
 	},
-	LayoutSpacing = 6,
+	LayoutSpacing = 8,
 	TitleHeight = 28,
 	SubtitleHeight = 16,
 	InfoGroupHeight = 100,
-	RewardGroupHeight = 76,
-	ContentScale = 1.1,
+	RewardGroupHeight = 80,
+	ContentScale = 1.05,
+	OutcomeRewardGap = 8,
 	PatternImage = "rbxassetid://126294497128009",
 	PatternTransparency = 0.9,
 	PatternTileScale = 0.25,
@@ -11913,7 +11914,7 @@ local function buildUi()
 	local statusStack = Instance.new("Frame")
 	statusStack.Name = "StatusStack"
 	statusStack.BackgroundTransparency = 1
-	statusStack.Size = UDim2.new(0, 210, 0, 44)
+	statusStack.Size = UDim2.new(0, 190, 0, 44)
 	statusStack.AnchorPoint = Vector2.new(1, 0)
 	statusStack.Position = UDim2.new(1, -UI_CONFIG.PanelPadding.Right, 0, UI_CONFIG.PanelPadding.Top)
 	statusStack.ZIndex = 9
@@ -11943,6 +11944,13 @@ local function buildUi()
 	outcomeContainer.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
 	outcomeContainer.ZIndex = 5
 	outcomeContainer.Parent = content
+
+	local gap = Instance.new("Frame")
+	gap.Name = "OutcomeRewardGap"
+	gap.BackgroundTransparency = 1
+	gap.Size = UDim2.new(1, 0, 0, UI_CONFIG.OutcomeRewardGap)
+	gap.ZIndex = 5
+	gap.Parent = content
 
 	local outcomeCorner = Instance.new("UICorner")
 	outcomeCorner.CornerRadius = UDim.new(0, 10)
@@ -12136,19 +12144,20 @@ local function stopFooterDots()
 	footerLoopActive = false
 end
 
-local function startCountdown(seconds)
+	local function startCountdown(seconds)
 	if not UI.CountdownLabel then
 		return
 	end
 	task.spawn(function()
-		local remaining = math.max(0, math.floor(seconds))
-		while remaining >= 0 and footerLoopActive do
+		local start = os.clock()
+		while footerLoopActive do
+			local elapsed = os.clock() - start
+			local remaining = math.max(0, math.ceil(seconds - elapsed))
 			UI.CountdownLabel.Text = string.format("Closing in %02ds", remaining)
-			if remaining == 0 then
+			if remaining <= 0 then
 				break
 			end
-			task.wait(0.25)
-			remaining -= 1
+			task.wait(1)
 		end
 	end)
 end
