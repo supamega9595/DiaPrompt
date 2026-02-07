@@ -11754,20 +11754,25 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 600,
-	PanelHeight = 440,
-	PanelPositionY = 0.34,
+	PanelHeight = 380,
+	PanelPositionY = 0.4,
 	PanelCornerRadius = 14,
 	PanelPadding = {
-		Top = 22,
-		Bottom = 26,
+		Top = 20,
+		Bottom = 24,
 		Left = 30,
 		Right = 30,
 	},
+	LayoutSpacing = 10,
+	TitleHeight = 30,
+	SubtitleHeight = 20,
+	InfoGroupHeight = 92,
+	RewardGroupHeight = 96,
 	PatternImage = "rbxassetid://5553946656",
 	PatternTransparency = 0.92,
 	PatternTileScale = 1,
 	RewardTileWidth = 165,
-	RewardTileHeight = 92,
+	RewardTileHeight = 88,
 	RewardTileTransparency = 0.35,
 }
 
@@ -11874,23 +11879,23 @@ local function buildUi()
 	padding.Parent = panel
 
 	local stack = Instance.new("UIListLayout")
-	stack.Padding = UDim.new(0, 12)
+	stack.Padding = UDim.new(0, UI_CONFIG.LayoutSpacing)
 	stack.SortOrder = Enum.SortOrder.LayoutOrder
 	stack.Parent = panel
 
 	local title = createText(panel, "Title", "Night Summary", 26, Enum.FontWeight.Bold, COLORS.Gold, Enum.TextXAlignment.Left)
 	title.Font = Enum.Font.GothamBold
-	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Size = UDim2.new(1, 0, 0, UI_CONFIG.TitleHeight)
 	title.ZIndex = 5
 
 	local subtitle = createText(panel, "Subtitle", "Dawn breaks. Here's how the night went.", 14, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
-	subtitle.Size = UDim2.new(1, 0, 0, 20)
+	subtitle.Size = UDim2.new(1, 0, 0, UI_CONFIG.SubtitleHeight)
 	subtitle.ZIndex = 5
 
 	local infoGroup = Instance.new("Frame")
 	infoGroup.Name = "InfoGroup"
 	infoGroup.BackgroundTransparency = 1
-	infoGroup.Size = UDim2.new(1, 0, 0, 104)
+	infoGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
 	infoGroup.ZIndex = 5
 	infoGroup.Parent = panel
 
@@ -11923,7 +11928,7 @@ local function buildUi()
 	local rewardGroup = Instance.new("Frame")
 	rewardGroup.Name = "RewardGroup"
 	rewardGroup.BackgroundTransparency = 1
-	rewardGroup.Size = UDim2.new(1, 0, 0, 112)
+	rewardGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.RewardGroupHeight)
 	rewardGroup.ZIndex = 5
 	rewardGroup.Parent = panel
 
