@@ -10791,6 +10791,21 @@ end
 local function hideCollectedPage(instance)
 	local page = findPageRoot(instance) or instance
 	if page then
+		local part = page:IsA("BasePart") and page or page:FindFirstChildWhichIsA("BasePart")
+		if part then
+			local sound = Instance.new("Sound")
+			sound.Name = "QuestPageCollectSound"
+			sound.SoundId = "rbxassetid://131858956380043"
+			sound.Volume = 1
+			sound.RollOffMode = Enum.RollOffMode.Inverse
+			sound.RollOffMaxDistance = 35
+			sound.RollOffMinDistance = 6
+			sound.Parent = part
+			sound:Play()
+			sound.Ended:Connect(function()
+				sound:Destroy()
+			end)
+		end
 		setPageActive(page, false)
 		removeQuestPickupTags(page)
 	end
@@ -11115,14 +11130,6 @@ local function awardXP(player, amount)
 	player:SetAttribute("DailyContractXP", math.floor((player:GetAttribute("DailyContractXP") or 0) + amount))
 end
 
-local function hasAcceptedContract(player)
-	local contract = questState.activeContract
-	if not contract then
-		return false
-	end
-	return player:GetAttribute("AcceptedContractId") == contract.Id and player:GetAttribute("AcceptedContractDay") == DayIndex.Value
-end
-
 local function payoutNightRewards()
 	local contract = questState.activeContract
 	if not contract then
@@ -11131,9 +11138,6 @@ local function payoutNightRewards()
 	local rarityMultiplier = RewardsConfig.MultipliersByRarity[contract.Rarity] or 1
 
 	for _, player in ipairs(Players:GetPlayers()) do
-		if not hasAcceptedContract(player) then
-			continue
-		end
 		local distance = questState.playerDistances[player] or 0
 		local survived = not questState.playerDied[player]
 		local survivalCash = RewardsConfig.SurvivalCashBase
