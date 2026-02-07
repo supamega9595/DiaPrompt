@@ -11754,23 +11754,24 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 640,
-	PanelHeight = 340,
+	PanelHeight = 350,
 	PanelPositionY = 0.37,
 	PanelCornerRadius = 14,
 	PanelPadding = {
-		Top = 18,
-		Bottom = 16,
+	Top = 20,
+	Bottom = 18,
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 6,
+	LayoutSpacing = 8,
 	TitleHeight = 28,
 	SubtitleHeight = 16,
-	InfoGroupHeight = 88,
-	RewardGroupHeight = 84,
-	PatternImage = "rbxassetid://5553946656",
+	InfoGroupHeight = 96,
+	RewardGroupHeight = 88,
+	ContentScale = 1.08,
+	PatternImage = "rbxassetid://126294497128009",
 	PatternTransparency = 0.9,
-	PatternTileScale = 1,
+	PatternTileScale = 0.25,
 	RewardTileWidth = 176,
 	RewardTileHeight = 80,
 	RewardTileTransparency = 0.28,
@@ -11873,7 +11874,7 @@ local function buildUi()
 	pattern.Image = UI_CONFIG.PatternImage
 	pattern.ImageTransparency = UI_CONFIG.PatternTransparency
 	pattern.ScaleType = Enum.ScaleType.Tile
-	pattern.TileSize = UDim2.new(0, 220 * UI_CONFIG.PatternTileScale, 0, 220 * UI_CONFIG.PatternTileScale)
+	pattern.TileSize = UDim2.new(UI_CONFIG.PatternTileScale, 0, UI_CONFIG.PatternTileScale, 0)
 	pattern.Size = UDim2.new(1, 0, 1, 0)
 	pattern.ZIndex = 2
 	pattern.Parent = panel
@@ -11890,6 +11891,10 @@ local function buildUi()
 	content.ZIndex = 5
 	content.Parent = panel
 
+	local contentScale = Instance.new("UIScale")
+	contentScale.Scale = UI_CONFIG.ContentScale
+	contentScale.Parent = content
+
 	local stack = Instance.new("UIListLayout")
 	stack.Padding = UDim.new(0, UI_CONFIG.LayoutSpacing)
 	stack.SortOrder = Enum.SortOrder.LayoutOrder
@@ -11904,6 +11909,31 @@ local function buildUi()
 	subtitle.Size = UDim2.new(1, 0, 0, UI_CONFIG.SubtitleHeight)
 	subtitle.TextTransparency = 0.15
 	subtitle.ZIndex = 5
+
+	local statusStack = Instance.new("Frame")
+	statusStack.Name = "StatusStack"
+	statusStack.BackgroundTransparency = 1
+	statusStack.Size = UDim2.new(0, 180, 0, 44)
+	statusStack.Position = UDim2.new(1, -180, 0, 0)
+	statusStack.ZIndex = 7
+	statusStack.Parent = content
+
+	local statusLayout = Instance.new("UIListLayout")
+	statusLayout.Padding = UDim.new(0, 2)
+	statusLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	statusLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	statusLayout.Parent = statusStack
+
+	local statusLabel = createText(statusStack, "StatusLabel", "Returning at dawn…", 13, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Right)
+	statusLabel.Size = UDim2.new(1, 0, 0, 20)
+	statusLabel.TextTransparency = 0.2
+	statusLabel.ZIndex = 7
+
+	local countdownLabel = createText(statusStack, "CountdownLabel", "Closing in 04s", 14, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Right)
+	countdownLabel.Size = UDim2.new(1, 0, 0, 22)
+	countdownLabel.ZIndex = 7
+	UI.StatusLabel = statusLabel
+	UI.CountdownLabel = countdownLabel
 
 	local outcomeContainer = Instance.new("Frame")
 	outcomeContainer.Name = "OutcomeContainer"
@@ -11926,7 +11956,7 @@ local function buildUi()
 	infoGroup.Parent = outcomeContainer
 
 	local infoLayout = Instance.new("UIListLayout")
-	infoLayout.Padding = UDim.new(0, 6)
+	infoLayout.Padding = UDim.new(0, 8)
 	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	infoLayout.Parent = infoGroup
 
@@ -11972,10 +12002,10 @@ local function buildUi()
 	UI.QuestChip, UI.QuestValue = createChip(questRow)
 
 	local distanceRow = createInfoRow("Distance")
-	UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 18, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
-	UI.DistanceValue.Size = UDim2.new(0.4, 0, 1, 0)
-	UI.DistanceValue.Position = UDim2.new(0.6, 0, 0, 0)
-	UI.DistanceValue.ZIndex = 7
+		UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 19, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
+		UI.DistanceValue.Size = UDim2.new(0.4, 0, 1, 0)
+		UI.DistanceValue.Position = UDim2.new(0.6, 0, 0, 0)
+		UI.DistanceValue.ZIndex = 7
 
 	local rewardGroup = Instance.new("Frame")
 	rewardGroup.Name = "RewardGroup"
@@ -11988,7 +12018,7 @@ local function buildUi()
 	rewardLayout.FillDirection = Enum.FillDirection.Horizontal
 	rewardLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	rewardLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	rewardLayout.Padding = UDim.new(0, 12)
+	rewardLayout.Padding = UDim.new(0, 10)
 	rewardLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	rewardLayout.Parent = rewardGroup
 
@@ -12037,12 +12067,6 @@ local function buildUi()
 	UI.CashValue = createRewardTile("CashTile", "CASH")
 	UI.XPValue = createRewardTile("XPTile", "XP")
 	UI.WinsValue = createRewardTile("WinsTile", "WINS")
-
-	local footer = createText(content, "Footer", "Returning at dawn…", 12, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Right)
-	footer.Size = UDim2.new(1, 0, 0, 18)
-	footer.TextTransparency = 0.35
-	footer.ZIndex = 6
-	UI.Footer = footer
 
 	UI.Panel = panel
 	UI.PanelScale = panelScale
@@ -12098,7 +12122,9 @@ local function startFooterDots()
 		local dots = {"", ".", "..", "..."}
 		local index = 1
 		while footerLoopActive do
-			UI.Footer.Text = "Returning at dawn" .. dots[index]
+			if UI.StatusLabel then
+				UI.StatusLabel.Text = "Returning at dawn" .. dots[index]
+			end
 			index = index % #dots + 1
 			task.wait(0.4)
 		end
@@ -12109,6 +12135,23 @@ local function stopFooterDots()
 	footerLoopActive = false
 end
 
+local function startCountdown(seconds)
+	if not UI.CountdownLabel then
+		return
+	end
+	task.spawn(function()
+		local remaining = math.max(0, math.floor(seconds))
+		while remaining >= 0 and footerLoopActive do
+			UI.CountdownLabel.Text = string.format("Closing in %02ds", remaining)
+			if remaining == 0 then
+				break
+			end
+			task.wait(0.25)
+			remaining -= 1
+		end
+	end)
+end
+
 local function showSummary(data)
 	buildUi()
 	gui.Enabled = true
@@ -12116,6 +12159,7 @@ local function showSummary(data)
 	UI.PanelScale.Scale = 0.05
 	setTextAlpha(0)
 	startFooterDots()
+	startCountdown(COUNT_DELAY + COUNT_DURATION + HOLD_DURATION)
 
 	local survived = data and data.Survived
 	local completed = data and data.QuestCompleted
@@ -12132,7 +12176,7 @@ local function showSummary(data)
 	UI.QuestValue.TextColor3 = Color3.fromRGB(245, 245, 245)
 	UI.QuestChip.BackgroundColor3 = completed and Color3.fromRGB(90, 74, 35) or Color3.fromRGB(70, 64, 64)
 
-	UI.DistanceValue.Text = string.format("<font size='20'>%s</font> <font size='14' color='#b6b0a8'>studs</font>", formatNumber(distance))
+	UI.DistanceValue.Text = string.format("<font size='21'>%s</font> <font size='13' color='#b6b0a8'>studs</font>", formatNumber(distance))
 	UI.DistanceValue.TextColor3 = COLORS.Text
 
 	UI.CashValue.Text = "+0"
