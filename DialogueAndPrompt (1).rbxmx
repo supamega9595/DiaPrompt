@@ -11754,25 +11754,25 @@ local CLOSE_TIME = 0.2
 
 local UI_CONFIG = {
 	PanelWidth = 620,
-	PanelHeight = 380,
+	PanelHeight = 360,
 	PanelPositionY = 0.36,
 	PanelCornerRadius = 14,
 	PanelPadding = {
-		Top = 20,
-		Bottom = 24,
+		Top = 22,
+		Bottom = 20,
 		Left = 30,
 		Right = 30,
 	},
-	LayoutSpacing = 10,
+	LayoutSpacing = 8,
 	TitleHeight = 30,
-	SubtitleHeight = 20,
+	SubtitleHeight = 18,
 	InfoGroupHeight = 92,
-	RewardGroupHeight = 96,
+	RewardGroupHeight = 92,
 	PatternImage = "rbxassetid://5553946656",
 	PatternTransparency = 0.92,
 	PatternTileScale = 1,
-	RewardTileWidth = 165,
-	RewardTileHeight = 88,
+	RewardTileWidth = 168,
+	RewardTileHeight = 84,
 	RewardTileTransparency = 0.35,
 }
 
@@ -11792,6 +11792,7 @@ local COLORS = {
 local UI = {}
 local sounds = {}
 local countConnection
+local footerLoopActive = false
 
 local function ensureSound(name, soundId)
 	if sounds[name] then
@@ -11823,6 +11824,7 @@ local function createText(parent, name, text, size, weight, color, alignment)
 	label.TextColor3 = color
 	label.TextXAlignment = alignment or Enum.TextXAlignment.Left
 	label.TextYAlignment = Enum.TextYAlignment.Center
+	label.RichText = true
 	label.Parent = parent
 	return label
 end
@@ -11889,19 +11891,33 @@ local function buildUi()
 	title.Size = UDim2.new(1, 0, 0, UI_CONFIG.TitleHeight)
 	title.ZIndex = 5
 
-	local subtitle = createText(content, "Subtitle", "Dawn breaks. Here's how the night went.", 14, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
+	local subtitle = createText(content, "Subtitle", "Dawn breaks. Here's how the night went.", 13, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
 	subtitle.Size = UDim2.new(1, 0, 0, UI_CONFIG.SubtitleHeight)
+	subtitle.TextTransparency = 0.15
 	subtitle.ZIndex = 5
+
+	local outcomeContainer = Instance.new("Frame")
+	outcomeContainer.Name = "OutcomeContainer"
+	outcomeContainer.BackgroundColor3 = Color3.fromRGB(20, 18, 16)
+	outcomeContainer.BackgroundTransparency = 0.4
+	outcomeContainer.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
+	outcomeContainer.ZIndex = 5
+	outcomeContainer.Parent = content
+
+	local outcomeCorner = Instance.new("UICorner")
+	outcomeCorner.CornerRadius = UDim.new(0, 10)
+	outcomeCorner.Parent = outcomeContainer
 
 	local infoGroup = Instance.new("Frame")
 	infoGroup.Name = "InfoGroup"
 	infoGroup.BackgroundTransparency = 1
-	infoGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
-	infoGroup.ZIndex = 5
-	infoGroup.Parent = content
+	infoGroup.Size = UDim2.new(1, -20, 1, -16)
+	infoGroup.Position = UDim2.new(0, 10, 0, 8)
+	infoGroup.ZIndex = 6
+	infoGroup.Parent = outcomeContainer
 
 	local infoLayout = Instance.new("UIListLayout")
-	infoLayout.Padding = UDim.new(0, 8)
+	infoLayout.Padding = UDim.new(0, 6)
 	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	infoLayout.Parent = infoGroup
 
@@ -11911,20 +11927,46 @@ local function buildUi()
 		row.Size = UDim2.new(1, 0, 0, 24)
 		row.Parent = infoGroup
 
-		local label = createText(row, "Label", labelText, 18, Enum.FontWeight.SemiBold, COLORS.GoldSoft, Enum.TextXAlignment.Left)
-		label.Size = UDim2.new(0.55, 0, 1, 0)
+		local label = createText(row, "Label", labelText, 17, Enum.FontWeight.Medium, COLORS.GoldSoft, Enum.TextXAlignment.Left)
+		label.Size = UDim2.new(0.6, 0, 1, 0)
 		label.ZIndex = 6
 
-		local value = createText(row, "Value", "--", 18, Enum.FontWeight.Regular, COLORS.Text, Enum.TextXAlignment.Right)
-		value.Size = UDim2.new(0.45, 0, 1, 0)
-		value.Position = UDim2.new(0.55, 0, 0, 0)
-		value.ZIndex = 6
-		return value
+		return row, label
 	end
 
-	UI.SurvivedValue = createInfoRow("Survived")
-	UI.QuestValue = createInfoRow("Quest Completed")
-	UI.DistanceValue = createInfoRow("Distance")
+	local function createChip(parent)
+		local chip = Instance.new("Frame")
+		chip.Name = "Chip"
+		chip.BackgroundColor3 = Color3.fromRGB(32, 30, 28)
+		chip.BackgroundTransparency = 0
+		chip.Size = UDim2.new(0, 60, 0, 20)
+		chip.AnchorPoint = Vector2.new(1, 0.5)
+		chip.Position = UDim2.new(1, 0, 0.5, 0)
+		chip.ZIndex = 7
+		chip.Parent = parent
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 10)
+		corner.Parent = chip
+
+		local text = createText(chip, "ChipText", "YES", 12, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Center)
+		text.Size = UDim2.new(1, 0, 1, 0)
+		text.ZIndex = 8
+		text.Font = Enum.Font.GothamBold
+		return chip, text
+	end
+
+	local survivedRow = createInfoRow("Survived")
+	UI.SurvivedChip, UI.SurvivedValue = createChip(survivedRow)
+
+	local questRow = createInfoRow("Quest Completed")
+	UI.QuestChip, UI.QuestValue = createChip(questRow)
+
+	local distanceRow = createInfoRow("Distance")
+	UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 18, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
+	UI.DistanceValue.Size = UDim2.new(0.4, 0, 1, 0)
+	UI.DistanceValue.Position = UDim2.new(0.6, 0, 0, 0)
+	UI.DistanceValue.ZIndex = 7
 
 	local rewardGroup = Instance.new("Frame")
 	rewardGroup.Name = "RewardGroup"
@@ -11960,16 +12002,25 @@ local function buildUi()
 		stroke.Thickness = 1
 		stroke.Parent = tile
 
-		local label = createText(tile, "Label", labelText, 14, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Center)
-		label.Position = UDim2.new(0, 0, 0, 12)
-		label.Size = UDim2.new(1, 0, 0, 18)
+		local label = createText(tile, "Label", labelText, 12, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Center)
+		label.Position = UDim2.new(0, 0, 0, 10)
+		label.Size = UDim2.new(1, 0, 0, 16)
 		label.ZIndex = 7
 
-		local value = createText(tile, "Value", "+0", 22, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Center)
+		local value = createText(tile, "Value", "+0", 24, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Center)
 		value.Font = Enum.Font.GothamBold
-		value.Position = UDim2.new(0, 0, 0, 38)
-		value.Size = UDim2.new(1, 0, 0, 36)
+		value.Position = UDim2.new(0, 0, 0, 34)
+		value.Size = UDim2.new(1, 0, 0, 38)
 		value.ZIndex = 7
+
+		local accent = Instance.new("Frame")
+		accent.Name = "Accent"
+		accent.BackgroundColor3 = COLORS.Gold
+		accent.BackgroundTransparency = 0.7
+		accent.Size = UDim2.new(0.3, 0, 0, 2)
+		accent.Position = UDim2.new(0.35, 0, 1, -8)
+		accent.ZIndex = 7
+		accent.Parent = tile
 
 		return value
 	end
@@ -11977,6 +12028,12 @@ local function buildUi()
 	UI.CashValue = createRewardTile("CashTile", "CASH")
 	UI.XPValue = createRewardTile("XPTile", "XP")
 	UI.WinsValue = createRewardTile("WinsTile", "WINS")
+
+	local footer = createText(content, "Footer", "Returning at dawn…", 12, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Right)
+	footer.Size = UDim2.new(1, 0, 0, 18)
+	footer.TextTransparency = 0.35
+	footer.ZIndex = 6
+	UI.Footer = footer
 
 	UI.Panel = panel
 	UI.PanelScale = panelScale
@@ -12023,12 +12080,33 @@ local function pulseQuestValue()
 	end)
 end
 
+local function startFooterDots()
+	if footerLoopActive then
+		return
+	end
+	footerLoopActive = true
+	task.spawn(function()
+		local dots = {"", ".", "..", "..."}
+		local index = 1
+		while footerLoopActive do
+			UI.Footer.Text = "Returning at dawn" .. dots[index]
+			index = index % #dots + 1
+			task.wait(0.4)
+		end
+	end)
+end
+
+local function stopFooterDots()
+	footerLoopActive = false
+end
+
 local function showSummary(data)
 	buildUi()
 	gui.Enabled = true
 	UI.Panel.Visible = true
 	UI.PanelScale.Scale = 0.05
 	setTextAlpha(0)
+	startFooterDots()
 
 	local survived = data and data.Survived
 	local completed = data and data.QuestCompleted
@@ -12038,12 +12116,14 @@ local function showSummary(data)
 	local winsEarned = data and (data.WinsEarned or data.WinsAwarded) or 0
 
 	UI.SurvivedValue.Text = survived and "YES" or "NO"
-	UI.SurvivedValue.TextColor3 = survived and COLORS.SurviveYes or COLORS.SurviveNo
+	UI.SurvivedValue.TextColor3 = Color3.fromRGB(245, 245, 245)
+	UI.SurvivedChip.BackgroundColor3 = survived and Color3.fromRGB(46, 76, 58) or Color3.fromRGB(70, 64, 64)
 
 	UI.QuestValue.Text = completed and "YES" or "NO"
-	UI.QuestValue.TextColor3 = completed and COLORS.Gold or COLORS.QuestNo
+	UI.QuestValue.TextColor3 = Color3.fromRGB(245, 245, 245)
+	UI.QuestChip.BackgroundColor3 = completed and Color3.fromRGB(90, 74, 35) or Color3.fromRGB(70, 64, 64)
 
-	UI.DistanceValue.Text = string.format("%s studs", formatNumber(distance))
+	UI.DistanceValue.Text = string.format("<font size='20'>%s</font> <font size='14' color='#b6b0a8'>studs</font>", formatNumber(distance))
 	UI.DistanceValue.TextColor3 = COLORS.Text
 
 	UI.CashValue.Text = "+0"
@@ -12079,6 +12159,7 @@ local function showSummary(data)
 						closeSound:Play()
 						local closeTween = tweenScale(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.In, CLOSE_TIME)
 						closeTween.Completed:Connect(function()
+							stopFooterDots()
 							UI.Panel.Visible = false
 							gui.Enabled = false
 						end)
