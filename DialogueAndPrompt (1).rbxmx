@@ -11306,7 +11306,7 @@ end)
 Players.PlayerAdded:Connect(function(player)
 	questState.playerDistances[player] = 0
 	questState.playerLastPositions[player] = nil
-	questState.playerDied[player] = false
+	questState.playerDied[player] = not isDaytime(Lighting:GetMinutesAfterMidnight())
 	registerDeathTracking(player)
 end)
 
@@ -13088,6 +13088,27 @@ local UI = {}
 local currentContractId
 local distanceLoop
 local shadow
+local acceptConnection
+local closeConnection
+
+local function ensureButtonConnections()
+	if not acceptConnection and UI.AcceptButton then
+		acceptConnection = UI.AcceptButton.MouseButton1Click:Connect(function()
+			if currentContractId then
+				AcceptContract:FireServer(currentContractId)
+				setAcceptedState(true)
+				local tween = TweenService:Create(UI.AcceptButton, TweenInfo.new(ACCEPT_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Size = UI.AcceptButton.Size + UDim2.new(0, 6, 0, 2),
+				})
+				tween:Play()
+			end
+		end)
+	end
+
+	if not closeConnection and UI.CloseButton then
+		closeConnection = UI.CloseButton.MouseButton1Click:Connect(closeBoard)
+	end
+end
 
 local function ensureShadow()
 	if shadow then
@@ -13112,6 +13133,7 @@ end
 
 local function buildUI()
 	if UI.Container then
+		ensureButtonConnections()
 		return
 	end
 
@@ -13376,6 +13398,7 @@ local function buildUI()
 	UI.AcceptButton = acceptButton
 	UI.AcceptStroke = acceptStroke
 	UI.Shimmer = nil
+	ensureButtonConnections()
 end
 
 local function clearObjectives()
@@ -13510,18 +13533,7 @@ ShowContractUI.OnClientEvent:Connect(function(data)
 	startDistanceMonitor()
 end)
 
-UI.AcceptButton.MouseButton1Click:Connect(function()
-	if currentContractId then
-		AcceptContract:FireServer(currentContractId)
-		setAcceptedState(true)
-		local tween = TweenService:Create(UI.AcceptButton, TweenInfo.new(ACCEPT_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UI.AcceptButton.Size + UDim2.new(0, 6, 0, 2),
-		})
-		tween:Play()
-	end
-end)
-
-UI.CloseButton.MouseButton1Click:Connect(closeBoard)]]></ProtectedString>
+]]></ProtectedString>
 						<bool name="Disabled">false</bool>
 						<Content name="LinkedSource"><null></null></Content>
 						<token name="RunContext">0</token>
