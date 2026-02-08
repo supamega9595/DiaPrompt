@@ -11140,7 +11140,7 @@ local function payoutNightRewards()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local distance = questState.playerDistances[player] or 0
 		local survived = not questState.playerDied[player]
-		local survivalCash = RewardsConfig.SurvivalCashBase
+		local survivalCash = survived and RewardsConfig.SurvivalCashBase or 0
 		local completionCash = questState.completed and RewardsConfig.QuestCompleteCash or 0
 		local distanceCash = calculateDistanceCash(distance)
 		local totalCash = (survivalCash + completionCash + distanceCash) * rarityMultiplier
