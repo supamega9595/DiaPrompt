@@ -10299,10 +10299,10 @@ return RarityConfig]]></ProtectedString>
 					<BinaryString name="Tags"></BinaryString>
 				</Properties>
 			</Item>
-			<Item class="ModuleScript" referent="RBXF0EA90F4D3894FAB93B268AC7A7C25DA">
-				<Properties>
-					<Content name="LinkedSource"><null></null></Content>
-					<ProtectedString name="Source"><![CDATA[return {
+				<Item class="ModuleScript" referent="RBXF0EA90F4D3894FAB93B268AC7A7C25DA">
+					<Properties>
+						<Content name="LinkedSource"><null></null></Content>
+						<ProtectedString name="Source"><![CDATA[return {
 	{
 		Id = "daily_pages",
 		Name = "Lost Pages",
@@ -10333,17 +10333,42 @@ return RarityConfig]]></ProtectedString>
 			CrateTag = "QuestPickup_Crate",
 			DropTag = "QuestDrop_Crate",
 		},
+		},
+	}]]></ProtectedString>
+						<string name="ScriptGuid">{2d5db30d-9156-49b3-813c-4c0d087788d3}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestContractsConfig</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="ModuleScript" referent="RBX5467C6E1E3B944A59B5C49BC6B9F2A1B">
+					<Properties>
+						<Content name="LinkedSource"><null></null></Content>
+						<ProtectedString name="Source"><![CDATA[return {
+	ForceContract = true,
+	ForcedContractId = "daily_pages",
+	Pages = {
+		FolderName = "QuestSpawns",
+		PagesFolderName = "Pages",
+		PagesToSpawn = 8,
+		PickupTag = "QuestPickup_Page",
+	},
+	SummaryUI = {
+		AutoCloseSeconds = 10,
 	},
 }]]></ProtectedString>
-					<string name="ScriptGuid">{2d5db30d-9156-49b3-813c-4c0d087788d3}</string>
-					<BinaryString name="AttributesSerialize"></BinaryString>
-					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
-					<bool name="DefinesCapabilities">false</bool>
-					<string name="Name">QuestContractsConfig</string>
-					<int64 name="SourceAssetId">-1</int64>
-					<BinaryString name="Tags"></BinaryString>
-				</Properties>
-			</Item>
+						<string name="ScriptGuid">{7c1fe18f-5c3e-4ff8-acde-9f2ca67b7a14}</string>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">QuestSettings</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
 			<Item class="ModuleScript" referent="RBXB11EFFD617374FCB8ABE79813376A2BE">
 				<Properties>
 					<Content name="LinkedSource"><null></null></Content>
@@ -10351,6 +10376,11 @@ return RarityConfig]]></ProtectedString>
 	SurvivalCashBase = 75,
 	QuestCompleteCash = 250,
 	DistanceCashPerStud = 0.35,
+	XP = {
+		SurvivalBase = 90,
+		CompletionBonus = 160,
+		DistancePerStud = 0.02,
+	},
 	MultipliersByRarity = {
 		Common = 1,
 		Epic = 1.2,
@@ -10407,6 +10437,16 @@ return RarityConfig]]></ProtectedString>
 						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
 						<bool name="DefinesCapabilities">false</bool>
 						<string name="Name">AcceptContract</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+				</Item>
+				<Item class="RemoteEvent" referent="RBX7F3D2B8F1C3D4E48A7E6B0C7EDE16B5A">
+					<Properties>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">ShowNightSummary</string>
 						<int64 name="SourceAssetId">-1</int64>
 						<BinaryString name="Tags"></BinaryString>
 					</Properties>
@@ -10471,10 +10511,12 @@ local RarityConfig = require(Config.RarityConfig)
 local QuestContractsConfig = require(Config.QuestContractsConfig)
 local DialogueConfig = require(Config.DialogueConfig)
 local RewardsConfig = require(Config.RewardsConfig)
+local QuestSettings = require(Config.QuestSettings)
 
 local RequestContractUI = Remotes:WaitForChild("RequestContractUI")
 local ShowContractUI = Remotes:WaitForChild("ShowContractUI")
 local AcceptContract = Remotes:WaitForChild("AcceptContract")
+local ShowNightSummary = Remotes:WaitForChild("ShowNightSummary")
 
 local ActiveContractId = State:WaitForChild("ActiveContractId")
 local DayIndex = State:WaitForChild("DayIndex")
@@ -10493,6 +10535,14 @@ local function getContractById(contractId)
 end
 
 local function chooseDailyContract()
+	if QuestSettings.ForceContract then
+		local forced = getContractById(QuestSettings.ForcedContractId)
+		if not forced then
+			warn("QuestService: Forced contract id not found:", QuestSettings.ForcedContractId)
+		else
+			return forced
+		end
+	end
 	if #QuestContractsConfig == 0 then
 		warn("QuestContractsConfig has no contracts configured.")
 		return nil
@@ -10510,6 +10560,9 @@ local questState = {
 	startTime = 0,
 	playerDistances = {},
 	playerLastPositions = {},
+	playerDied = {},
+	playerDeathConnections = {},
+	activePages = {},
 }
 
 local function clearQuestConnections()
@@ -10544,6 +10597,240 @@ local function getPickupBasePart(instance)
 		return instance.PrimaryPart or instance:FindFirstChildWhichIsA("BasePart")
 	end
 	return nil
+end
+
+local function getQuestPagesFolder()
+	local questSpawns = workspace:FindFirstChild(QuestSettings.Pages.FolderName)
+	if not questSpawns then
+		return nil
+	end
+	return questSpawns:FindFirstChild(QuestSettings.Pages.PagesFolderName)
+end
+
+local function recordPartDefaults(part)
+	if part:GetAttribute("QuestDefaultTransparency") == nil then
+		part:SetAttribute("QuestDefaultTransparency", part.Transparency)
+	end
+	if part:GetAttribute("QuestDefaultCanCollide") == nil then
+		part:SetAttribute("QuestDefaultCanCollide", part.CanCollide)
+	end
+	if part:GetAttribute("QuestDefaultCanTouch") == nil then
+		part:SetAttribute("QuestDefaultCanTouch", part.CanTouch)
+	end
+	if part:GetAttribute("QuestDefaultCanQuery") == nil then
+		part:SetAttribute("QuestDefaultCanQuery", part.CanQuery)
+	end
+end
+
+local function recordSurfaceDefaults(surface)
+	if surface:GetAttribute("QuestDefaultTransparency") == nil then
+		surface:SetAttribute("QuestDefaultTransparency", surface.Transparency)
+	end
+end
+
+local function setSurfaceVisibility(surface, isActive)
+	recordSurfaceDefaults(surface)
+	if isActive then
+		surface.Transparency = surface:GetAttribute("QuestDefaultTransparency") or surface.Transparency
+	else
+		surface.Transparency = 1
+	end
+end
+
+local function setPartVisibility(part, isActive)
+	recordPartDefaults(part)
+	if isActive then
+		part.Transparency = part:GetAttribute("QuestDefaultTransparency") or part.Transparency
+		part.CanCollide = part:GetAttribute("QuestDefaultCanCollide") ~= false
+		part.CanTouch = part:GetAttribute("QuestDefaultCanTouch") ~= false
+		part.CanQuery = part:GetAttribute("QuestDefaultCanQuery") ~= false
+	else
+		part.Transparency = 1
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+	end
+
+	for _, child in ipairs(part:GetChildren()) do
+		if child:IsA("Decal") or child:IsA("Texture") then
+			setSurfaceVisibility(child, isActive)
+		end
+	end
+end
+
+local function setPromptVisibility(prompt, isActive)
+	if prompt:GetAttribute("QuestDefaultEnabled") == nil then
+		prompt:SetAttribute("QuestDefaultEnabled", prompt.Enabled)
+	end
+	if isActive then
+		prompt.Enabled = prompt:GetAttribute("QuestDefaultEnabled") ~= false
+	else
+		prompt.Enabled = false
+	end
+end
+
+local function setPageActive(page, isActive)
+	local parts = {}
+	if page:IsA("BasePart") then
+		table.insert(parts, page)
+	else
+		for _, descendant in ipairs(page:GetDescendants()) do
+			if descendant:IsA("BasePart") then
+				table.insert(parts, descendant)
+			end
+		end
+	end
+	for _, part in ipairs(parts) do
+		setPartVisibility(part, isActive)
+	end
+
+	local prompts = {}
+	if page:IsA("ProximityPrompt") then
+		table.insert(prompts, page)
+	else
+		for _, descendant in ipairs(page:GetDescendants()) do
+			if descendant:IsA("ProximityPrompt") then
+				table.insert(prompts, descendant)
+			end
+		end
+	end
+	for _, prompt in ipairs(prompts) do
+		setPromptVisibility(prompt, isActive)
+	end
+end
+
+local function findPageRoot(instance)
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return nil
+	end
+	local node = instance
+	while node and node ~= workspace do
+		if node.Parent == folder then
+			return node
+		end
+		node = node.Parent
+	end
+	return nil
+end
+
+local function removeQuestPickupTags(page)
+	if CollectionService:HasTag(page, QuestSettings.Pages.PickupTag) then
+		CollectionService:RemoveTag(page, QuestSettings.Pages.PickupTag)
+	end
+	for _, descendant in ipairs(page:GetDescendants()) do
+		if CollectionService:HasTag(descendant, QuestSettings.Pages.PickupTag) then
+			CollectionService:RemoveTag(descendant, QuestSettings.Pages.PickupTag)
+		end
+	end
+end
+
+local function applyQuestPickupTag(page)
+	local prompt = page:FindFirstChildOfClass("ProximityPrompt") or page:FindFirstChildWhichIsA("ProximityPrompt", true)
+	if prompt then
+		CollectionService:AddTag(prompt, QuestSettings.Pages.PickupTag)
+		return
+	end
+	CollectionService:AddTag(page, QuestSettings.Pages.PickupTag)
+end
+
+local function resetAllPages()
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return
+	end
+	for _, page in ipairs(folder:GetChildren()) do
+		if page:IsA("BasePart") or page:IsA("Model") then
+			removeQuestPickupTags(page)
+			setPageActive(page, false)
+		end
+	end
+	questState.activePages = {}
+end
+
+local function selectRandomPages()
+	local folder = getQuestPagesFolder()
+	if not folder then
+		return {}
+	end
+	local pages = {}
+	for _, page in ipairs(folder:GetChildren()) do
+		if page:IsA("BasePart") or page:IsA("Model") then
+			table.insert(pages, page)
+		end
+	end
+	for i = #pages, 2, -1 do
+		local j = math.random(1, i)
+		pages[i], pages[j] = pages[j], pages[i]
+	end
+	local count = math.min(QuestSettings.Pages.PagesToSpawn or 8, #pages)
+	local selection = {}
+	for i = 1, count do
+		table.insert(selection, pages[i])
+	end
+	return selection
+end
+
+local function activatePageQuest()
+	resetAllPages()
+	if isDaytime(Lighting:GetMinutesAfterMidnight()) then
+		return
+	end
+	local selection = selectRandomPages()
+	for _, page in ipairs(selection) do
+		setPageActive(page, true)
+		applyQuestPickupTag(page)
+	end
+	questState.activePages = selection
+end
+
+local function deactivatePageQuest()
+	resetAllPages()
+end
+
+local function hideCollectedPage(instance)
+	local page = findPageRoot(instance) or instance
+	if page then
+		local part = page:IsA("BasePart") and page or page:FindFirstChildWhichIsA("BasePart")
+		if part then
+			local sound = Instance.new("Sound")
+			sound.Name = "QuestPageCollectSound"
+			sound.SoundId = "rbxassetid://131858956380043"
+			sound.Volume = 1
+			sound.RollOffMode = Enum.RollOffMode.Inverse
+			sound.RollOffMaxDistance = 35
+			sound.RollOffMinDistance = 6
+			sound.Parent = part
+			sound:Play()
+			sound.Ended:Connect(function()
+				sound:Destroy()
+			end)
+		end
+		setPageActive(page, false)
+		removeQuestPickupTags(page)
+	end
+end
+
+local function registerDeathTracking(player)
+	local function onCharacterAdded(character)
+		local existing = questState.playerDeathConnections[player]
+		if existing then
+			existing:Disconnect()
+			questState.playerDeathConnections[player] = nil
+		end
+		local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 5)
+		if humanoid then
+			local connection
+			connection = humanoid.Died:Connect(function()
+				questState.playerDied[player] = true
+			end)
+			questState.playerDeathConnections[player] = connection
+		end
+	end
+	player.CharacterAdded:Connect(onCharacterAdded)
+	if player.Character then
+		onCharacterAdded(player.Character)
+	end
 end
 
 local function ensureNpcPrompt(isDay)
@@ -10623,6 +10910,9 @@ questHandlers.SharedCollectCount = {
 				return
 			end
 			collected[instance] = true
+			if pickupTag == QuestSettings.Pages.PickupTag then
+				hideCollectedPage(instance)
+			end
 			questState.progress += 1
 			if questState.progress >= questState.target then
 				questState.completed = true
@@ -10748,12 +11038,19 @@ local function startNightlyQuest(contract)
 	questState.startTime = os.time()
 	questState.playerDistances = {}
 	questState.playerLastPositions = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		questState.playerDied[player] = false
+	end
 
 	local handler = questHandlers[contract.Type]
 	if handler and handler.start then
 		handler.start(contract)
 	else
 		warn("QuestService: No handler for quest type:", contract.Type)
+	end
+
+	if contract.Id == QuestSettings.ForcedContractId or (contract.Settings and contract.Settings.PickupTag == QuestSettings.Pages.PickupTag) then
+		activatePageQuest()
 	end
 end
 
@@ -10765,6 +11062,7 @@ local function stopNightlyQuest()
 			handler.stop()
 		end
 	end
+	deactivatePageQuest()
 	questState.activeContract = nil
 	questState.completed = false
 	questState.progress = 0
@@ -10783,6 +11081,19 @@ local function calculateDistanceCash(distance)
 	return capped + (remaining * RewardsConfig.DistanceCashPerStud * postCapMultiplier)
 end
 
+local function calculateXP(distance, survived, completed)
+	local xpConfig = RewardsConfig.XP or {}
+	local total = 0
+	if survived then
+		total += xpConfig.SurvivalBase or 0
+	end
+	if completed then
+		total += xpConfig.CompletionBonus or 0
+	end
+	total += distance * (xpConfig.DistancePerStud or 0)
+	return math.floor(total)
+end
+
 local function awardCash(player, amount)
 	local leaderstats = player:FindFirstChild("leaderstats")
 	if leaderstats then
@@ -10795,6 +11106,30 @@ local function awardCash(player, amount)
 	player:SetAttribute("DailyContractCash", math.floor((player:GetAttribute("DailyContractCash") or 0) + amount))
 end
 
+local function awardWins(player, amount)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local wins = leaderstats:FindFirstChild("Wins")
+		if wins and wins:IsA("IntValue") then
+			wins.Value += amount
+			return
+		end
+	end
+	player:SetAttribute("DailyContractWins", math.floor((player:GetAttribute("DailyContractWins") or 0) + amount))
+end
+
+local function awardXP(player, amount)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	if leaderstats then
+		local xp = leaderstats:FindFirstChild("XP")
+		if xp and (xp:IsA("IntValue") or xp:IsA("NumberValue")) then
+			xp.Value += math.floor(amount)
+			return
+		end
+	end
+	player:SetAttribute("DailyContractXP", math.floor((player:GetAttribute("DailyContractXP") or 0) + amount))
+end
+
 local function payoutNightRewards()
 	local contract = questState.activeContract
 	if not contract then
@@ -10804,11 +11139,31 @@ local function payoutNightRewards()
 
 	for _, player in ipairs(Players:GetPlayers()) do
 		local distance = questState.playerDistances[player] or 0
-		local survivalCash = RewardsConfig.SurvivalCashBase
-		local completionCash = questState.completed and RewardsConfig.QuestCompleteCash or 0
+		local survived = not questState.playerDied[player]
+		local accepted = player:GetAttribute("AcceptedContractId") == contract.Id and player:GetAttribute("AcceptedContractDay") == DayIndex.Value
+		local survivalCash = survived and RewardsConfig.SurvivalCashBase or 0
+		local completionCash = (accepted and questState.completed) and RewardsConfig.QuestCompleteCash or 0
 		local distanceCash = calculateDistanceCash(distance)
-		local total = (survivalCash + completionCash + distanceCash) * rarityMultiplier
-		awardCash(player, total)
+		local totalCash = (survivalCash + completionCash + distanceCash) * rarityMultiplier
+		local xpAward = calculateXP(distance, survived, accepted and questState.completed)
+		local winsAward = survived and 1 or 0
+
+		awardCash(player, totalCash)
+		if winsAward > 0 then
+			awardWins(player, winsAward)
+		end
+		if xpAward > 0 then
+			awardXP(player, xpAward)
+		end
+
+		ShowNightSummary:FireClient(player, {
+			Survived = survived,
+			QuestCompleted = accepted and questState.completed,
+			Distance = distance,
+			CashAwarded = totalCash,
+			XPAwarded = xpAward,
+			WinsAwarded = winsAward,
+		})
 	end
 end
 
@@ -10905,6 +11260,11 @@ else
 end
 
 ensureNpcPrompt(lastIsDay)
+resetAllPages()
+
+for _, player in ipairs(Players:GetPlayers()) do
+	registerDeathTracking(player)
+end
 
 if not lastIsDay then
 	local contract = getContractById(ActiveContractId.Value)
@@ -10946,11 +11306,19 @@ end)
 Players.PlayerAdded:Connect(function(player)
 	questState.playerDistances[player] = 0
 	questState.playerLastPositions[player] = nil
+	questState.playerDied[player] = false
+	registerDeathTracking(player)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
 	questState.playerDistances[player] = nil
 	questState.playerLastPositions[player] = nil
+	questState.playerDied[player] = nil
+	local connection = questState.playerDeathConnections[player]
+	if connection then
+		connection:Disconnect()
+		questState.playerDeathConnections[player] = nil
+	end
 end)]]></ProtectedString>
 						<bool name="Disabled">false</bool>
 						<Content name="LinkedSource"><null></null></Content>
@@ -11341,9 +11709,546 @@ updateTextSize()]]></ProtectedString>
 						</Item>
 					</Item>
 				</Item>
+				</Item>
 			</Item>
-		</Item>
-			<Item class="ScreenGui" referent="RBX475A9C9828584B119426DD856D33AAF2">
+				<Item class="ScreenGui" referent="RBX7B73B8C2CEB947DE8A90B7A7A95D8E2E">
+					<Properties>
+						<bool name="ClipToDeviceSafeArea">true</bool>
+						<int name="DisplayOrder">50</int>
+						<token name="SafeAreaCompatibility">1</token>
+						<token name="ScreenInsets">2</token>
+						<bool name="Enabled">true</bool>
+						<bool name="ResetOnSpawn">false</bool>
+						<token name="ZIndexBehavior">1</token>
+						<bool name="AutoLocalize">true</bool>
+						<Ref name="RootLocalizationTable">null</Ref>
+						<token name="SelectionBehaviorDown">0</token>
+						<token name="SelectionBehaviorLeft">0</token>
+						<token name="SelectionBehaviorRight">0</token>
+						<token name="SelectionBehaviorUp">0</token>
+						<bool name="SelectionGroup">false</bool>
+						<BinaryString name="AttributesSerialize"></BinaryString>
+						<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+						<bool name="DefinesCapabilities">false</bool>
+						<string name="Name">NightSummaryGui</string>
+						<int64 name="SourceAssetId">-1</int64>
+						<BinaryString name="Tags"></BinaryString>
+					</Properties>
+					<Item class="LocalScript" referent="RBX978F1D57E1C744F3A4F8DCD09D05E6C8">
+						<Properties>
+								<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
+local Remotes = QuestSystem:WaitForChild("Remotes")
+local ShowNightSummary = Remotes:WaitForChild("ShowNightSummary")
+
+local gui = script.Parent
+gui.Enabled = false
+
+local OPEN_TIME = 0.2
+local COUNT_DELAY = 0.25
+local COUNT_DURATION = 1.0
+local HOLD_DURATION = 4.0
+local CLOSE_TIME = 0.2
+
+local UI_CONFIG = {
+	PanelWidth = 640,
+	PanelHeight = 300,
+	PanelPositionY = 0.37,
+	PanelCornerRadius = 14,
+	PanelPadding = {
+		Top = 16,
+		Bottom = 12,
+		Left = 30,
+		Right = 40,
+	},
+	LayoutSpacing = 8,
+	TitleHeight = 28,
+	SubtitleHeight = 16,
+	InfoGroupHeight = 100,
+	RewardGroupHeight = 80,
+	ContentScale = 1.05,
+	OutcomeRewardGap = 8,
+	PatternImage = "rbxassetid://126294497128009",
+	PatternTransparency = 0.9,
+	PatternTileScale = 0.25,
+	RewardTileWidth = 176,
+	RewardTileHeight = 80,
+	RewardTileTransparency = 0.28,
+	PanelStrokeThickness = 2,
+	PanelStrokeTransparency = 0.15,
+}
+
+local COLORS = {
+	Gold = Color3.fromRGB(212, 175, 55),
+	GoldSoft = Color3.fromRGB(197, 164, 50),
+	Text = Color3.fromRGB(236, 232, 224),
+	Muted = Color3.fromRGB(170, 165, 160),
+	PanelTop = Color3.fromRGB(22, 19, 17),
+	PanelBottom = Color3.fromRGB(10, 9, 8),
+	Shadow = Color3.fromRGB(0, 0, 0),
+	SurviveYes = Color3.fromRGB(120, 196, 140),
+	SurviveNo = Color3.fromRGB(155, 138, 138),
+	QuestNo = Color3.fromRGB(155, 138, 138),
+}
+
+local UI = {}
+local sounds = {}
+local countConnection
+local footerLoopActive = false
+
+local function ensureSound(name, soundId)
+	if sounds[name] then
+		return sounds[name]
+	end
+	local sound = Instance.new("Sound")
+	sound.Name = name
+	sound.SoundId = soundId
+	sound.Volume = 0.6
+	sound.Parent = gui
+	sounds[name] = sound
+	return sound
+end
+
+local function formatNumber(value)
+	local str = tostring(math.floor(value))
+	local result = str:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	result = result:gsub("^,", "")
+	return result
+end
+
+local function createText(parent, name, text, size, weight, color, alignment)
+	local label = Instance.new("TextLabel")
+	label.Name = name
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextSize = size
+	label.TextColor3 = color
+	label.TextXAlignment = alignment or Enum.TextXAlignment.Left
+	label.TextYAlignment = Enum.TextYAlignment.Center
+	label.RichText = true
+	label.Parent = parent
+	return label
+end
+
+local function buildUi()
+	if UI.Panel then
+		return
+	end
+
+	local panel = Instance.new("Frame")
+	panel.Name = "SummaryPanel"
+	panel.AnchorPoint = Vector2.new(0.5, 0.5)
+	panel.Position = UDim2.new(0.5, 0, UI_CONFIG.PanelPositionY, 0)
+	panel.Size = UDim2.new(0, UI_CONFIG.PanelWidth, 0, UI_CONFIG.PanelHeight)
+	panel.BackgroundColor3 = COLORS.PanelBottom
+	panel.BackgroundTransparency = 0
+	panel.ClipsDescendants = true
+	panel.Visible = false
+	panel.ZIndex = 3
+	panel.Parent = gui
+
+	local panelCorner = Instance.new("UICorner")
+	panelCorner.CornerRadius = UDim.new(0, UI_CONFIG.PanelCornerRadius)
+	panelCorner.Parent = panel
+
+	local panelStroke = Instance.new("UIStroke")
+	panelStroke.Name = "GoldOutline"
+	panelStroke.Color = COLORS.Gold
+	panelStroke.Thickness = UI_CONFIG.PanelStrokeThickness
+	panelStroke.Transparency = UI_CONFIG.PanelStrokeTransparency
+	panelStroke.Parent = panel
+
+	local panelGradient = Instance.new("UIGradient")
+	panelGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, COLORS.PanelTop),
+		ColorSequenceKeypoint.new(1, COLORS.PanelBottom),
+	})
+	panelGradient.Rotation = 90
+	panelGradient.Parent = panel
+
+	local pattern = Instance.new("ImageLabel")
+	pattern.Name = "Pattern"
+	pattern.BackgroundTransparency = 1
+	pattern.Image = UI_CONFIG.PatternImage
+	pattern.ImageTransparency = UI_CONFIG.PatternTransparency
+	pattern.ScaleType = Enum.ScaleType.Tile
+	pattern.TileSize = UDim2.new(UI_CONFIG.PatternTileScale, 0, UI_CONFIG.PatternTileScale, 0)
+	pattern.Size = UDim2.new(1, 0, 1, 0)
+	pattern.ZIndex = 2
+	pattern.Parent = panel
+
+	local panelScale = Instance.new("UIScale")
+	panelScale.Scale = 0.05
+	panelScale.Parent = panel
+
+	local content = Instance.new("Frame")
+	content.Name = "Content"
+	content.BackgroundTransparency = 1
+	content.Position = UDim2.new(0, UI_CONFIG.PanelPadding.Left, 0, UI_CONFIG.PanelPadding.Top)
+	content.Size = UDim2.new(1, -(UI_CONFIG.PanelPadding.Left + UI_CONFIG.PanelPadding.Right), 1, -(UI_CONFIG.PanelPadding.Top + UI_CONFIG.PanelPadding.Bottom))
+	content.ZIndex = 5
+	content.Parent = panel
+
+	local contentScale = Instance.new("UIScale")
+	contentScale.Scale = UI_CONFIG.ContentScale
+	contentScale.Parent = content
+
+	local stack = Instance.new("UIListLayout")
+	stack.Padding = UDim.new(0, UI_CONFIG.LayoutSpacing)
+	stack.SortOrder = Enum.SortOrder.LayoutOrder
+	stack.Parent = content
+
+	local title = createText(content, "Title", "Night Summary", 26, Enum.FontWeight.Bold, COLORS.Gold, Enum.TextXAlignment.Left)
+	title.Font = Enum.Font.GothamBold
+	title.Size = UDim2.new(1, 0, 0, UI_CONFIG.TitleHeight)
+	title.ZIndex = 5
+
+	local subtitle = createText(content, "Subtitle", "Dawn breaks. Here's how the night went.", 13, Enum.FontWeight.Regular, COLORS.Muted, Enum.TextXAlignment.Left)
+	subtitle.Size = UDim2.new(1, 0, 0, UI_CONFIG.SubtitleHeight)
+	subtitle.TextTransparency = 0.15
+	subtitle.ZIndex = 5
+
+	local statusStack = Instance.new("Frame")
+	statusStack.Name = "StatusStack"
+	statusStack.BackgroundTransparency = 1
+	statusStack.Size = UDim2.new(0, 190, 0, 44)
+	statusStack.AnchorPoint = Vector2.new(1, 0)
+	statusStack.Position = UDim2.new(1, -UI_CONFIG.PanelPadding.Right, 0, UI_CONFIG.PanelPadding.Top)
+	statusStack.ZIndex = 9
+	statusStack.Parent = panel
+
+	local statusLayout = Instance.new("UIListLayout")
+	statusLayout.Padding = UDim.new(0, 2)
+	statusLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	statusLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	statusLayout.Parent = statusStack
+
+	local statusLabel = createText(statusStack, "StatusLabel", "Returning at dawn…", 14, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Right)
+	statusLabel.Size = UDim2.new(1, 0, 0, 20)
+	statusLabel.TextTransparency = 0.2
+	statusLabel.ZIndex = 9
+
+	local countdownLabel = createText(statusStack, "CountdownLabel", "Closing in 04s", 16, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Right)
+	countdownLabel.Size = UDim2.new(1, 0, 0, 22)
+	countdownLabel.ZIndex = 9
+	UI.StatusLabel = statusLabel
+	UI.CountdownLabel = countdownLabel
+
+	local outcomeContainer = Instance.new("Frame")
+	outcomeContainer.Name = "OutcomeContainer"
+	outcomeContainer.BackgroundColor3 = Color3.fromRGB(20, 18, 16)
+	outcomeContainer.BackgroundTransparency = 0.4
+	outcomeContainer.Size = UDim2.new(1, 0, 0, UI_CONFIG.InfoGroupHeight)
+	outcomeContainer.ZIndex = 5
+	outcomeContainer.Parent = content
+
+	local gap = Instance.new("Frame")
+	gap.Name = "OutcomeRewardGap"
+	gap.BackgroundTransparency = 1
+	gap.Size = UDim2.new(1, 0, 0, UI_CONFIG.OutcomeRewardGap)
+	gap.ZIndex = 5
+	gap.Parent = content
+
+	local outcomeCorner = Instance.new("UICorner")
+	outcomeCorner.CornerRadius = UDim.new(0, 10)
+	outcomeCorner.Parent = outcomeContainer
+
+	local infoGroup = Instance.new("Frame")
+	infoGroup.Name = "InfoGroup"
+	infoGroup.BackgroundTransparency = 1
+	infoGroup.Size = UDim2.new(1, -20, 1, -16)
+	infoGroup.Position = UDim2.new(0, 10, 0, 8)
+	infoGroup.ZIndex = 6
+	infoGroup.Parent = outcomeContainer
+
+	local infoLayout = Instance.new("UIListLayout")
+	infoLayout.Padding = UDim.new(0, 10)
+	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	infoLayout.Parent = infoGroup
+
+	local function createInfoRow(labelText)
+		local row = Instance.new("Frame")
+		row.BackgroundTransparency = 1
+		row.Size = UDim2.new(1, 0, 0, 24)
+		row.Parent = infoGroup
+
+		local label = createText(row, "Label", labelText, 17, Enum.FontWeight.Medium, COLORS.GoldSoft, Enum.TextXAlignment.Left)
+		label.Size = UDim2.new(0.6, 0, 1, 0)
+		label.ZIndex = 6
+
+		return row, label
+	end
+
+	local function createChip(parent)
+		local chip = Instance.new("Frame")
+		chip.Name = "Chip"
+		chip.BackgroundColor3 = Color3.fromRGB(32, 30, 28)
+		chip.BackgroundTransparency = 0
+		chip.Size = UDim2.new(0, 60, 0, 20)
+		chip.AnchorPoint = Vector2.new(1, 0.5)
+		chip.Position = UDim2.new(1, 0, 0.5, 0)
+		chip.ZIndex = 7
+		chip.Parent = parent
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 10)
+		corner.Parent = chip
+
+		local text = createText(chip, "ChipText", "YES", 12, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Center)
+		text.Size = UDim2.new(1, 0, 1, 0)
+		text.ZIndex = 8
+		text.Font = Enum.Font.GothamBold
+		return chip, text
+	end
+
+	local survivedRow = createInfoRow("Survived")
+	UI.SurvivedChip, UI.SurvivedValue = createChip(survivedRow)
+
+	local questRow = createInfoRow("Quest Completed")
+	UI.QuestChip, UI.QuestValue = createChip(questRow)
+
+	local distanceRow = createInfoRow("Distance")
+	UI.DistanceValue = createText(distanceRow, "DistanceValue", "--", 20, Enum.FontWeight.SemiBold, COLORS.Text, Enum.TextXAlignment.Right)
+		UI.DistanceValue.Size = UDim2.new(0.4, 0, 1, 0)
+		UI.DistanceValue.Position = UDim2.new(0.6, 0, 0, 0)
+		UI.DistanceValue.ZIndex = 7
+
+	local rewardGroup = Instance.new("Frame")
+	rewardGroup.Name = "RewardGroup"
+	rewardGroup.BackgroundTransparency = 1
+	rewardGroup.Size = UDim2.new(1, 0, 0, UI_CONFIG.RewardGroupHeight)
+	rewardGroup.ZIndex = 5
+	rewardGroup.Parent = content
+
+	local rewardLayout = Instance.new("UIListLayout")
+	rewardLayout.FillDirection = Enum.FillDirection.Horizontal
+	rewardLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	rewardLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	rewardLayout.Padding = UDim.new(0, 10)
+	rewardLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	rewardLayout.Parent = rewardGroup
+
+	local function createRewardTile(name, labelText)
+		local tile = Instance.new("Frame")
+		tile.Name = name
+		tile.BackgroundColor3 = Color3.fromRGB(24, 21, 19)
+		tile.BackgroundTransparency = UI_CONFIG.RewardTileTransparency
+		tile.Size = UDim2.new(0, UI_CONFIG.RewardTileWidth, 0, UI_CONFIG.RewardTileHeight)
+		tile.ZIndex = 6
+		tile.Parent = rewardGroup
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 10)
+		corner.Parent = tile
+
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(120, 103, 54)
+		stroke.Transparency = 0.7
+		stroke.Thickness = 1
+		stroke.Parent = tile
+
+		local label = createText(tile, "Label", labelText, 12, Enum.FontWeight.SemiBold, COLORS.Muted, Enum.TextXAlignment.Center)
+		label.Position = UDim2.new(0, 0, 0, 10)
+		label.Size = UDim2.new(1, 0, 0, 16)
+		label.ZIndex = 7
+
+		local value = createText(tile, "Value", "+0", 24, Enum.FontWeight.Bold, COLORS.Text, Enum.TextXAlignment.Center)
+		value.Font = Enum.Font.GothamBold
+		value.Position = UDim2.new(0, 0, 0, 34)
+		value.Size = UDim2.new(1, 0, 0, 38)
+		value.ZIndex = 7
+
+		local accent = Instance.new("Frame")
+		accent.Name = "Accent"
+		accent.BackgroundColor3 = COLORS.Gold
+		accent.BackgroundTransparency = 0.7
+		accent.Size = UDim2.new(0.3, 0, 0, 2)
+		accent.Position = UDim2.new(0.35, 0, 1, -8)
+		accent.ZIndex = 7
+		accent.Parent = tile
+
+		return value
+	end
+
+	UI.CashValue = createRewardTile("CashTile", "CASH")
+	UI.XPValue = createRewardTile("XPTile", "XP")
+	UI.WinsValue = createRewardTile("WinsTile", "WINS")
+
+	UI.Panel = panel
+	UI.PanelScale = panelScale
+end
+
+local function setTextAlpha(alpha)
+	for _, element in pairs(UI) do
+		if typeof(element) == "Instance" then
+			for _, child in ipairs(element:GetDescendants()) do
+				if child:IsA("TextLabel") then
+					child.TextTransparency = alpha
+				end
+			end
+		end
+	end
+end
+
+local function tweenScale(target, easingStyle, easingDirection, duration)
+	local tween = TweenService:Create(UI.PanelScale, TweenInfo.new(duration, easingStyle, easingDirection), {Scale = target})
+	tween:Play()
+	return tween
+end
+
+local function stopCountConnection()
+	if countConnection then
+		countConnection:Disconnect()
+		countConnection = nil
+	end
+end
+
+local function pulseQuestValue()
+	local scale = UI.QuestValue:FindFirstChild("PulseScale")
+	if not scale then
+		scale = Instance.new("UIScale")
+		scale.Name = "PulseScale"
+		scale.Parent = UI.QuestValue
+	end
+	scale.Scale = 1
+	local tweenOut = TweenService:Create(scale, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 1.06})
+	local tweenIn = TweenService:Create(scale, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 1})
+	tweenOut:Play()
+	tweenOut.Completed:Connect(function()
+		tweenIn:Play()
+	end)
+end
+
+local function startFooterDots()
+	if footerLoopActive then
+		return
+	end
+	footerLoopActive = true
+	task.spawn(function()
+		local dots = {"", ".", "..", "..."}
+		local index = 1
+		while footerLoopActive do
+			if UI.StatusLabel then
+				UI.StatusLabel.Text = "Returning at dawn" .. dots[index]
+			end
+			index = index % #dots + 1
+			task.wait(0.4)
+		end
+	end)
+end
+
+local function stopFooterDots()
+	footerLoopActive = false
+end
+
+	local function startCountdown(seconds)
+	if not UI.CountdownLabel then
+		return
+	end
+	task.spawn(function()
+		local start = os.clock()
+		while footerLoopActive do
+			local elapsed = os.clock() - start
+			local remaining = math.max(0, math.ceil(seconds - elapsed))
+			UI.CountdownLabel.Text = string.format("Closing in %02ds", remaining)
+			if remaining <= 0 then
+				break
+			end
+			task.wait(1)
+		end
+	end)
+end
+
+local function showSummary(data)
+	buildUi()
+	gui.Enabled = true
+	UI.Panel.Visible = true
+	UI.PanelScale.Scale = 0.05
+	setTextAlpha(0)
+	startFooterDots()
+	startCountdown(COUNT_DELAY + COUNT_DURATION + HOLD_DURATION)
+
+	local survived = data and data.Survived
+	local completed = data and data.QuestCompleted
+	local distance = data and (data.DistanceStuds or data.Distance) or 0
+	local cashEarned = data and (data.CashEarned or data.CashAwarded) or 0
+	local xpEarned = data and (data.XPEarned or data.XPAwarded) or 0
+	local winsEarned = data and (data.WinsEarned or data.WinsAwarded) or 0
+
+	UI.SurvivedValue.Text = survived and "YES" or "NO"
+	UI.SurvivedValue.TextColor3 = Color3.fromRGB(245, 245, 245)
+	UI.SurvivedChip.BackgroundColor3 = survived and Color3.fromRGB(46, 76, 58) or Color3.fromRGB(70, 64, 64)
+
+	UI.QuestValue.Text = completed and "YES" or "NO"
+	UI.QuestValue.TextColor3 = Color3.fromRGB(245, 245, 245)
+	UI.QuestChip.BackgroundColor3 = completed and Color3.fromRGB(90, 74, 35) or Color3.fromRGB(70, 64, 64)
+
+	UI.DistanceValue.Text = string.format("<font size='21'>%s</font> <font size='13' color='#b6b0a8'>studs</font>", formatNumber(distance))
+	UI.DistanceValue.TextColor3 = COLORS.Text
+
+	UI.CashValue.Text = "+0"
+	UI.XPValue.Text = "+0"
+	UI.WinsValue.Text = "+0"
+
+	local openTween = tweenScale(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out, OPEN_TIME)
+
+	openTween.Completed:Connect(function()
+		ensureSound("OpenSound", "rbxassetid://76917399147672"):Play()
+		if completed then
+			pulseQuestValue()
+		end
+		task.delay(COUNT_DELAY, function()
+			local countSound = ensureSound("CountSound", "rbxassetid://140677742495553")
+			countSound:Play()
+			local start = os.clock()
+			stopCountConnection()
+			countConnection = RunService.RenderStepped:Connect(function()
+				local elapsed = os.clock() - start
+				local alpha = math.clamp(elapsed / COUNT_DURATION, 0, 1)
+				local cashValue = math.floor(cashEarned * alpha)
+				local xpValue = math.floor(xpEarned * alpha)
+				local winsValue = math.floor(winsEarned * alpha)
+				UI.CashValue.Text = "+" .. formatNumber(cashValue)
+				UI.XPValue.Text = "+" .. formatNumber(xpValue)
+				UI.WinsValue.Text = "+" .. formatNumber(winsValue)
+				if alpha >= 1 then
+					stopCountConnection()
+					countSound:Stop()
+					task.delay(HOLD_DURATION, function()
+						local closeSound = ensureSound("CloseSound", "rbxassetid://73730549515939")
+						closeSound:Play()
+						local closeTween = tweenScale(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.In, CLOSE_TIME)
+						closeTween.Completed:Connect(function()
+							stopFooterDots()
+							UI.Panel.Visible = false
+							gui.Enabled = false
+						end)
+					end)
+				end
+			end)
+		end)
+	end)
+end
+
+ShowNightSummary.OnClientEvent:Connect(showSummary)]]></ProtectedString>
+							<bool name="Disabled">false</bool>
+							<Content name="LinkedSource"><null></null></Content>
+							<token name="RunContext">0</token>
+							<string name="ScriptGuid">{c3b5b1a6-9c66-4f8b-9dc2-b9d9ecbc8c29}</string>
+							<BinaryString name="AttributesSerialize"></BinaryString>
+							<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+							<bool name="DefinesCapabilities">false</bool>
+							<string name="Name">NightSummaryController</string>
+							<int64 name="SourceAssetId">-1</int64>
+							<BinaryString name="Tags"></BinaryString>
+						</Properties>
+					</Item>
+				</Item>
+				<Item class="ScreenGui" referent="RBX475A9C9828584B119426DD856D33AAF2">
 				<Properties>
 					<bool name="ClipToDeviceSafeArea">true</bool>
 					<int name="DisplayOrder">10</int>
@@ -12153,8 +13058,10 @@ updateTextSize()]]></ProtectedString>
 				</Item>
 				<Item class="LocalScript" referent="RBX6B7C8C9361184A8AADB266EE3B9428B1">
 					<Properties>
-						<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
+							<ProtectedString name="Source"><![CDATA[local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local QuestSystem = ReplicatedStorage:WaitForChild("QuestSystem")
 local Config = QuestSystem:WaitForChild("Config")
@@ -12168,193 +13075,390 @@ local AcceptContract = Remotes:WaitForChild("AcceptContract")
 
 local screenGui = script.Parent
 local board = screenGui:WaitForChild("ContractBoard")
-local header = board:WaitForChild("Header")
-local body = board:WaitForChild("Body")
-local footer = board:WaitForChild("Footer")
 
-local rarityBadge = header:WaitForChild("RarityBadge")
-local questName = header:WaitForChild("QuestName")
-local dayLabel = header:WaitForChild("DayLabel")
-local closeButton = header:WaitForChild("CloseButton")
-local shimmer = header:WaitForChild("Shimmer")
+local LOCAL_PLAYER = Players.LocalPlayer
+local NPC_NAME = "showcase npc"
+local CLOSE_DISTANCE = 24
 
-local description = body:WaitForChild("Description")
-local objectives = body:WaitForChild("Objectives")
-local objectivesLayout = objectives:WaitForChild("UIListLayout")
-local flavorLine = body:WaitForChild("FlavorLine")
+local OPEN_TIME = 0.25
+local CLOSE_TIME = 0.2
+local ACCEPT_TIME = 0.18
 
-local threatBar = footer:WaitForChild("ThreatBar")
-local threatFill = threatBar:WaitForChild("Fill")
-local threatLabel = footer:WaitForChild("ThreatLabel")
-local threatValue = footer:WaitForChild("ThreatValue")
-local rewardsLabel = footer:WaitForChild("RewardsLabel")
-local acceptButton = footer:WaitForChild("AcceptButton")
-
-local boardGradient = board:FindFirstChildOfClass("UIGradient")
-local pulseTween
-local driftTween
-local shimmerActive = false
+local UI = {}
 local currentContractId
+local distanceLoop
+local shadow
 
-local function applyUIConfig()
-	board.Size = UDim2.fromOffset(UIConfig.Panel.Width, UIConfig.Panel.Height)
-	rarityBadge.Font = UIConfig.Fonts.Body
-	rarityBadge.TextSize = UIConfig.TextSizes.Small
-	questName.Font = UIConfig.Fonts.Header
-	questName.TextSize = UIConfig.TextSizes.Header
-	dayLabel.Font = UIConfig.Fonts.Body
-	dayLabel.TextSize = UIConfig.TextSizes.Small
-	description.Font = UIConfig.Fonts.Body
-	description.TextSize = UIConfig.TextSizes.Body
-	flavorLine.Font = UIConfig.Fonts.Body
-	flavorLine.TextSize = UIConfig.TextSizes.Small
-	threatLabel.Font = UIConfig.Fonts.Body
-	threatLabel.TextSize = UIConfig.TextSizes.Small
-	threatValue.Font = UIConfig.Fonts.Mono
-	threatValue.TextSize = UIConfig.TextSizes.Small
-	rewardsLabel.Font = UIConfig.Fonts.Body
-	rewardsLabel.TextSize = UIConfig.TextSizes.Small
-	acceptButton.Font = UIConfig.Fonts.Header
-	acceptButton.TextSize = UIConfig.TextSizes.Small
+local function ensureShadow()
+	if shadow then
+		return shadow
+	end
+	local img = Instance.new("ImageLabel")
+	img.Name = "ContractShadow"
+	img.AnchorPoint = Vector2.new(0.5, 0.5)
+	img.Position = board.Position + UDim2.new(0, 0, 0, 10)
+	img.Size = board.Size + UDim2.new(0, 40, 0, 40)
+	img.BackgroundTransparency = 1
+	img.Image = "rbxassetid://1316045217"
+	img.ImageTransparency = 0.8
+	img.ImageColor3 = Color3.new(0, 0, 0)
+	img.ScaleType = Enum.ScaleType.Slice
+	img.SliceCenter = Rect.new(10, 10, 118, 118)
+	img.ZIndex = board.ZIndex - 1
+	img.Parent = screenGui
+	shadow = img
+	return img
 end
 
-local function setupMobileScale()
-	if not UIConfig.Mobile.UseUIScale then
+local function buildUI()
+	if UI.Container then
 		return
 	end
-	local uiScale = board:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
-	uiScale.Parent = board
-	local reference = Vector2.new(1920, 1080)
-	local function updateScale()
-		local size = screenGui.AbsoluteSize
-		local scaleValue = math.min(size.X / reference.X, size.Y / reference.Y)
-		uiScale.Scale = math.clamp(scaleValue, UIConfig.Mobile.MinScale, 1)
+
+	board.BackgroundTransparency = 1
+	for _, child in ipairs(board:GetChildren()) do
+		child.Visible = false
 	end
-	updateScale()
-	screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateScale)
+
+	local container = Instance.new("Frame")
+	container.Name = "ContractUI"
+	container.AnchorPoint = Vector2.new(0.5, 0.5)
+	container.Position = UDim2.new(0.5, 0, 0.5, 0)
+	container.Size = UDim2.fromOffset(640, 360)
+	container.BackgroundColor3 = Color3.fromRGB(16, 16, 16)
+	container.BackgroundTransparency = 0
+	container.ZIndex = 5
+	container.Parent = board
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = container
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(171, 133, 72)
+	stroke.Transparency = 0.25
+	stroke.Thickness = 2
+	stroke.Parent = container
+
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(26, 24, 22)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 11, 10)),
+	})
+	gradient.Rotation = 90
+	gradient.Parent = container
+
+	local grain = Instance.new("ImageLabel")
+	grain.Name = "Grain"
+	grain.BackgroundTransparency = 1
+	grain.Image = "rbxassetid://5553946656"
+	grain.ImageTransparency = 0.92
+	grain.Size = UDim2.new(1, 0, 1, 0)
+	grain.ZIndex = 6
+	grain.Parent = container
+
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 18)
+	padding.PaddingBottom = UDim.new(0, 18)
+	padding.PaddingLeft = UDim.new(0, 22)
+	padding.PaddingRight = UDim.new(0, 22)
+	padding.Parent = container
+
+	local stack = Instance.new("UIListLayout")
+	stack.Padding = UDim.new(0, 12)
+	stack.SortOrder = Enum.SortOrder.LayoutOrder
+	stack.Parent = container
+
+	local header = Instance.new("Frame")
+	header.Name = "Header"
+	header.BackgroundTransparency = 1
+	header.Size = UDim2.new(1, 0, 0, 64)
+	header.Parent = container
+
+	local headerLayout = Instance.new("UIListLayout")
+	headerLayout.Padding = UDim.new(0, 6)
+	headerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	headerLayout.Parent = header
+
+	local rarity = Instance.new("TextLabel")
+	rarity.Name = "RarityBadge"
+	rarity.BackgroundTransparency = 1
+	rarity.Font = UIConfig.Fonts.Body
+	rarity.TextSize = UIConfig.TextSizes.Small
+	rarity.TextXAlignment = Enum.TextXAlignment.Left
+	rarity.TextColor3 = Color3.fromRGB(200, 200, 200)
+	rarity.Size = UDim2.new(1, 0, 0, 18)
+	rarity.Parent = header
+
+	local title = Instance.new("TextLabel")
+	title.Name = "QuestName"
+	title.BackgroundTransparency = 1
+	title.Font = UIConfig.Fonts.Header
+	title.TextSize = 26
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.Size = UDim2.new(1, -80, 0, 28)
+	title.Parent = header
+
+	local day = Instance.new("TextLabel")
+	day.Name = "DayLabel"
+	day.BackgroundTransparency = 1
+	day.Font = UIConfig.Fonts.Body
+	day.TextSize = 13
+	day.TextXAlignment = Enum.TextXAlignment.Left
+	day.TextColor3 = Color3.fromRGB(170, 170, 170)
+	day.Size = UDim2.new(1, 0, 0, 18)
+	day.Parent = header
+
+	local closeButton = Instance.new("TextButton")
+	closeButton.Name = "CloseButton"
+	closeButton.Text = "✕"
+	closeButton.Font = UIConfig.Fonts.Header
+	closeButton.TextSize = 18
+	closeButton.TextColor3 = Color3.new(1, 1, 1)
+	closeButton.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+	closeButton.Size = UDim2.fromOffset(30, 30)
+	closeButton.Position = UDim2.new(1, -34, 0, 0)
+	closeButton.AnchorPoint = Vector2.new(0.5, 0)
+	closeButton.AutoButtonColor = false
+	closeButton.Parent = header
+
+	local closeCorner = Instance.new("UICorner")
+	closeCorner.CornerRadius = UDim.new(0, 8)
+	closeCorner.Parent = closeButton
+
+	local body = Instance.new("Frame")
+	body.Name = "Body"
+	body.BackgroundTransparency = 1
+	body.Size = UDim2.new(1, 0, 0, 150)
+	body.Parent = container
+
+	local description = Instance.new("TextLabel")
+	description.Name = "Description"
+	description.BackgroundTransparency = 1
+	description.Font = UIConfig.Fonts.Body
+	description.TextSize = 15
+	description.TextWrapped = true
+	description.TextXAlignment = Enum.TextXAlignment.Left
+	description.TextYAlignment = Enum.TextYAlignment.Top
+	description.TextColor3 = Color3.fromRGB(210, 210, 210)
+	description.Size = UDim2.new(1, 0, 0, 48)
+	description.Parent = body
+
+	local objectivesBox = Instance.new("Frame")
+	objectivesBox.Name = "Objectives"
+	objectivesBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	objectivesBox.BackgroundTransparency = 0.35
+	objectivesBox.Size = UDim2.new(1, 0, 0, 70)
+	objectivesBox.Position = UDim2.new(0, 0, 0, 56)
+	objectivesBox.Parent = body
+
+	local objectivesCorner = Instance.new("UICorner")
+	objectivesCorner.CornerRadius = UDim.new(0, 8)
+	objectivesCorner.Parent = objectivesBox
+
+	local objectivesLayout = Instance.new("UIListLayout")
+	objectivesLayout.Padding = UDim.new(0, 6)
+	objectivesLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	objectivesLayout.Parent = objectivesBox
+
+	local objectivesPadding = Instance.new("UIPadding")
+	objectivesPadding.PaddingTop = UDim.new(0, 8)
+	objectivesPadding.PaddingLeft = UDim.new(0, 10)
+	objectivesPadding.Parent = objectivesBox
+
+	local flavorLine = Instance.new("TextLabel")
+	flavorLine.Name = "FlavorLine"
+	flavorLine.BackgroundTransparency = 1
+	flavorLine.Font = UIConfig.Fonts.Body
+	flavorLine.TextSize = 13
+	flavorLine.TextColor3 = Color3.fromRGB(150, 150, 150)
+	flavorLine.TextXAlignment = Enum.TextXAlignment.Left
+	flavorLine.Size = UDim2.new(1, 0, 0, 18)
+	flavorLine.Position = UDim2.new(0, 0, 1, -18)
+	flavorLine.Parent = body
+
+	local footer = Instance.new("Frame")
+	footer.Name = "Footer"
+	footer.BackgroundTransparency = 1
+	footer.Size = UDim2.new(1, 0, 0, 70)
+	footer.Parent = container
+
+	local threatLabel = Instance.new("TextLabel")
+	threatLabel.Name = "ThreatLabel"
+	threatLabel.BackgroundTransparency = 1
+	threatLabel.Font = UIConfig.Fonts.Body
+	threatLabel.TextSize = 12
+	threatLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	threatLabel.TextXAlignment = Enum.TextXAlignment.Left
+	threatLabel.Size = UDim2.new(0.4, 0, 0, 18)
+	threatLabel.Parent = footer
+
+	local threatValue = Instance.new("TextLabel")
+	threatValue.Name = "ThreatValue"
+	threatValue.BackgroundTransparency = 1
+	threatValue.Font = UIConfig.Fonts.Mono
+	threatValue.TextSize = 12
+	threatValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+	threatValue.TextXAlignment = Enum.TextXAlignment.Left
+	threatValue.Position = UDim2.new(0, 0, 0, 18)
+	threatValue.Size = UDim2.new(0.4, 0, 0, 18)
+	threatValue.Parent = footer
+
+	local threatBar = Instance.new("Frame")
+	threatBar.Name = "ThreatBar"
+	threatBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	threatBar.Size = UDim2.new(0.4, 0, 0, 8)
+	threatBar.Position = UDim2.new(0, 0, 0, 42)
+	threatBar.Parent = footer
+
+	local threatCorner = Instance.new("UICorner")
+	threatCorner.CornerRadius = UDim.new(0, 4)
+	threatCorner.Parent = threatBar
+
+	local threatFill = Instance.new("Frame")
+	threatFill.Name = "Fill"
+	threatFill.BackgroundColor3 = Color3.fromRGB(212, 175, 55)
+	threatFill.Size = UDim2.new(0.2, 0, 1, 0)
+	threatFill.Parent = threatBar
+
+	local threatFillCorner = Instance.new("UICorner")
+	threatFillCorner.CornerRadius = UDim.new(0, 4)
+	threatFillCorner.Parent = threatFill
+
+	local rewardsLabel = Instance.new("TextLabel")
+	rewardsLabel.Name = "RewardsLabel"
+	rewardsLabel.BackgroundTransparency = 1
+	rewardsLabel.Font = UIConfig.Fonts.Body
+	rewardsLabel.TextSize = 12
+	rewardsLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	rewardsLabel.TextXAlignment = Enum.TextXAlignment.Left
+	rewardsLabel.Position = UDim2.new(0.42, 0, 0, 0)
+	rewardsLabel.Size = UDim2.new(0.4, 0, 0, 18)
+	rewardsLabel.Parent = footer
+
+	local acceptButton = Instance.new("TextButton")
+	acceptButton.Name = "AcceptButton"
+	acceptButton.Text = "ACCEPT CONTRACT"
+	acceptButton.Font = UIConfig.Fonts.Header
+	acceptButton.TextSize = 13
+	acceptButton.TextColor3 = Color3.fromRGB(20, 16, 8)
+	acceptButton.BackgroundColor3 = Color3.fromRGB(201, 169, 94)
+	acceptButton.Size = UDim2.fromOffset(180, 36)
+	acceptButton.Position = UDim2.new(1, -180, 1, -36)
+	acceptButton.AnchorPoint = Vector2.new(0, 0)
+	acceptButton.AutoButtonColor = true
+	acceptButton.Parent = footer
+
+	local acceptCorner = Instance.new("UICorner")
+	acceptCorner.CornerRadius = UDim.new(0, 10)
+	acceptCorner.Parent = acceptButton
+
+	local acceptStroke = Instance.new("UIStroke")
+	acceptStroke.Color = Color3.fromRGB(120, 96, 48)
+	acceptStroke.Transparency = 0.4
+	acceptStroke.Parent = acceptButton
+
+	UI.Container = container
+	UI.RarityBadge = rarity
+	UI.QuestName = title
+	UI.DayLabel = day
+	UI.CloseButton = closeButton
+	UI.Description = description
+	UI.Objectives = objectivesBox
+	UI.ObjectivesLayout = objectivesLayout
+	UI.FlavorLine = flavorLine
+	UI.ThreatBar = threatBar
+	UI.ThreatFill = threatFill
+	UI.ThreatLabel = threatLabel
+	UI.ThreatValue = threatValue
+	UI.RewardsLabel = rewardsLabel
+	UI.AcceptButton = acceptButton
+	UI.AcceptStroke = acceptStroke
+	UI.Shimmer = nil
 end
 
-applyUIConfig()
-setupMobileScale()
-
 local function clearObjectives()
-	for _, child in ipairs(objectives:GetChildren()) do
+	for _, child in ipairs(UI.Objectives:GetChildren()) do
 		if child:IsA("TextLabel") then
 			child:Destroy()
 		end
 	end
 end
 
-local function stopEffects()
-	if pulseTween then
-		pulseTween:Cancel()
-		pulseTween = nil
-	end
-	if driftTween then
-		driftTween:Cancel()
-		driftTween = nil
-	end
-	shimmerActive = false
-	shimmer.Visible = false
-end
-
-local function startShimmer()
-	shimmerActive = true
-	shimmer.Visible = true
-
-	local function runOnce()
-		shimmer.Position = UDim2.new(-0.3, 0, 0, 0)
-		local tween = TweenService:Create(shimmer, TweenInfo.new(UIConfig.Animations.ShimmerTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-			Position = UDim2.new(1.1, 0, 0, 0),
-		})
-		tween:Play()
-		tween.Completed:Wait()
-	end
-
-	task.spawn(function()
-		while shimmerActive do
-			runOnce()
-			task.wait(UIConfig.Animations.ShimmerInterval)
-		end
-	end)
-end
-
 local function applyTheme(rarity)
 	local data = RarityConfig.Rarities[rarity] or RarityConfig.Rarities.Common
-	rarityBadge.Text = data.DisplayName:upper()
-	rarityBadge.TextColor3 = data.Theme.Accent
-	questName.TextColor3 = Color3.new(1, 1, 1)
-	dayLabel.TextColor3 = Color3.new(0.85, 0.85, 0.85)
-
-	board.BackgroundColor3 = data.Theme.BgBottom
-	if boardGradient then
-		boardGradient.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, data.Theme.BgTop),
-			ColorSequenceKeypoint.new(1, data.Theme.BgBottom),
-		})
-	end
-
-	local stroke = board:FindFirstChildOfClass("UIStroke")
+	UI.RarityBadge.Text = data.DisplayName:upper()
+	UI.RarityBadge.TextColor3 = data.Theme.Accent
+	UI.Container.BackgroundColor3 = data.Theme.BgBottom
+	local stroke = UI.Container:FindFirstChildOfClass("UIStroke")
 	if stroke then
 		stroke.Color = data.Theme.Stroke
 	end
-
-	stopEffects()
-
-	if data.Effects.GradientDrift and boardGradient then
-		driftTween = TweenService:Create(boardGradient, TweenInfo.new(UIConfig.Animations.GradientDriftTime, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1), {
-			Rotation = 360,
-		})
-		driftTween:Play()
-	end
-
-	if data.Effects.Pulse then
-		pulseTween = TweenService:Create(rarityBadge, TweenInfo.new(UIConfig.Animations.PulseTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-			Size = UDim2.new(0, rarityBadge.Size.X.Offset * UIConfig.Animations.PulseScale, 0, rarityBadge.Size.Y.Offset * UIConfig.Animations.PulseScale),
-		})
-		pulseTween:Play()
-	end
-
-	if data.Effects.Shimmer then
-		startShimmer()
-	end
+	UI.AcceptButton.BackgroundColor3 = data.Theme.Accent
+	UI.AcceptButton.TextColor3 = Color3.fromRGB(20, 14, 6)
 end
 
 local function setAcceptedState(accepted)
 	if accepted then
-		acceptButton.Text = "CONTRACT ACCEPTED"
-		acceptButton.AutoButtonColor = false
-		acceptButton.BackgroundTransparency = 0.35
-		acceptButton.Active = false
+		UI.AcceptButton.Text = "CONTRACT ACCEPTED"
+		UI.AcceptButton.AutoButtonColor = false
+		UI.AcceptButton.BackgroundTransparency = 0.35
+		UI.AcceptButton.Active = false
 	else
-		acceptButton.Text = "ACCEPT CONTRACT"
-		acceptButton.AutoButtonColor = true
-		acceptButton.BackgroundTransparency = 0
-		acceptButton.Active = true
+		UI.AcceptButton.Text = "ACCEPT CONTRACT"
+		UI.AcceptButton.AutoButtonColor = true
+		UI.AcceptButton.BackgroundTransparency = 0
+		UI.AcceptButton.Active = true
 	end
 end
 
 local function openBoard()
 	board.Visible = true
-	board.Position = UDim2.new(0.5, 0, 0.52, 0)
 	board.AnchorPoint = Vector2.new(0.5, 0.5)
-	board.BackgroundTransparency = 0.1
-	local tween = TweenService:Create(board, TweenInfo.new(UIConfig.Animations.OpenTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-	})
-	tween:Play()
+	board.Position = UDim2.new(0.5, 0, 0.52, 0)
+	local uiScale = board:FindFirstChildOfClass("UIScale") or Instance.new("UIScale")
+	uiScale.Scale = 0.95
+	uiScale.Parent = board
+	local shadow = ensureShadow()
+	shadow.Visible = true
+	local openTween = TweenService:Create(uiScale, TweenInfo.new(OPEN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 1})
+	openTween:Play()
 end
 
 local function closeBoard()
-	stopEffects()
-	local tween = TweenService:Create(board, TweenInfo.new(UIConfig.Animations.CloseTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-		Position = UDim2.new(0.5, 0, 0.55, 0),
-		BackgroundTransparency = 0.15,
-	})
-	tween:Play()
-	tween.Completed:Wait()
+	if distanceLoop then
+		distanceLoop:Disconnect()
+		distanceLoop = nil
+	end
+	local uiScale = board:FindFirstChildOfClass("UIScale")
+	if uiScale then
+		local closeTween = TweenService:Create(uiScale, TweenInfo.new(CLOSE_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.95})
+		closeTween:Play()
+		closeTween.Completed:Wait()
+	end
+	if shadow then
+		shadow.Visible = false
+	end
 	board.Visible = false
 	screenGui.Enabled = false
+end
+
+local function startDistanceMonitor()
+	if distanceLoop then
+		distanceLoop:Disconnect()
+	end
+	distanceLoop = RunService.Heartbeat:Connect(function()
+		local npc = workspace:FindFirstChild(NPC_NAME)
+		local root = npc and npc.PrimaryPart
+		local character = LOCAL_PLAYER and LOCAL_PLAYER.Character
+		local hrp = character and character:FindFirstChild("HumanoidRootPart")
+		if root and hrp then
+			if (hrp.Position - root.Position).Magnitude > CLOSE_DISTANCE then
+				closeBoard()
+			end
+		end
+	end)
 end
 
 ShowContractUI.OnClientEvent:Connect(function(data)
@@ -12362,12 +13466,13 @@ ShowContractUI.OnClientEvent:Connect(function(data)
 		return
 	end
 
+	buildUI()
 	currentContractId = data.Id
 	screenGui.Enabled = true
 
-	questName.Text = data.Name
-	dayLabel.Text = string.format("DAY CONTRACT • %d", data.DayIndex)
-	description.Text = data.Description
+	UI.QuestName.Text = data.Name
+	UI.DayLabel.Text = string.format("DAY CONTRACT • %d", data.DayIndex)
+	UI.Description.Text = data.Description
 
 	clearObjectives()
 	for _, objective in ipairs(data.Objectives or {}) do
@@ -12379,40 +13484,44 @@ ShowContractUI.OnClientEvent:Connect(function(data)
 		label.TextColor3 = Color3.fromRGB(220, 220, 220)
 		label.TextXAlignment = Enum.TextXAlignment.Left
 		label.Text = "• " .. objective
-		label.Parent = objectives
+		label.Parent = UI.Objectives
 	end
 
-	objectives.CanvasSize = UDim2.new(0, 0, 0, objectivesLayout.AbsoluteContentSize.Y + 6)
+	UI.Objectives.CanvasSize = UDim2.new(0, 0, 0, UI.ObjectivesLayout.AbsoluteContentSize.Y + 6)
 
 	local threat = data.Threat or 0
-	threatFill.Size = UDim2.new(math.clamp(threat / 100, 0, 1), 0, 1, 0)
-	threatLabel.Text = string.format("THREAT: %s", RarityConfig.getThreatTier(threat))
-	threatValue.Text = tostring(threat)
+	UI.ThreatFill.Size = UDim2.new(math.clamp(threat / 100, 0, 1), 0, 1, 0)
+	UI.ThreatLabel.Text = string.format("THREAT: %s", RarityConfig.getThreatTier(threat))
+	UI.ThreatValue.Text = tostring(threat)
 
-	rewardsLabel.Text = string.format("Rewards: %d survival + %d completion + %.2f/stud", data.Rewards.Survival, data.Rewards.Completion, data.Rewards.Distance)
+	UI.RewardsLabel.Text = string.format("Rewards: %d survival + %d completion + %.2f/stud", data.Rewards.Survival, data.Rewards.Completion, data.Rewards.Distance)
 
 	if data.FlavorLine and data.FlavorLine ~= "" then
-		flavorLine.Text = data.FlavorLine
-		flavorLine.Visible = true
+		UI.FlavorLine.Text = data.FlavorLine
+		UI.FlavorLine.Visible = true
 	else
-		flavorLine.Text = ""
-		flavorLine.Visible = false
+		UI.FlavorLine.Text = ""
+		UI.FlavorLine.Visible = false
 	end
 
 	applyTheme(data.Rarity)
 	setAcceptedState(data.Accepted)
-
 	openBoard()
+	startDistanceMonitor()
 end)
 
-acceptButton.MouseButton1Click:Connect(function()
+UI.AcceptButton.MouseButton1Click:Connect(function()
 	if currentContractId then
 		AcceptContract:FireServer(currentContractId)
 		setAcceptedState(true)
+		local tween = TweenService:Create(UI.AcceptButton, TweenInfo.new(ACCEPT_TIME, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UI.AcceptButton.Size + UDim2.new(0, 6, 0, 2),
+		})
+		tween:Play()
 	end
 end)
 
-closeButton.MouseButton1Click:Connect(closeBoard)]]></ProtectedString>
+UI.CloseButton.MouseButton1Click:Connect(closeBoard)]]></ProtectedString>
 						<bool name="Disabled">false</bool>
 						<Content name="LinkedSource"><null></null></Content>
 						<token name="RunContext">0</token>
